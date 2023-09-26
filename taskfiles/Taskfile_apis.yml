@@ -1,0 +1,115 @@
+---
+# NOTICE: WHEN ADDING A SERVICE, CLIENT or ANY PROGRAM
+#
+#         Use the name of the directory containing your main.go as the NAME
+#         variable when invoking build-any
+#
+#         This will be automatically consistent with the binary names chosen
+#         by go install
+
+version: '3'
+
+# Environment variables set for all commands.
+env_build: &env_build
+  # XDG_CACHE_HOME: This may need to be set for python builds, but try to use
+  # virtual env instead.
+
+  # The GOCACHE in a linux container on Docker for windows MUST be on a linuxy
+  # file system
+  GOCACHE: /tmp/jitsuin/rkvstcommon-api
+
+
+vars:
+
+  # DESTDIR
+  #
+  # This variable is required (as far as possible) to behave like
+  # https://www.gnu.org/prep/standards/html_node/DESTDIR.html.
+  # We do not have an 'install' task. All tasks which produce 'install'
+  # artifacts will prepend the output paths with DESTDIR. The 'build' target
+  # deals with any awkward outputs
+  #
+  # When using DESTDIR to create output paths, do NOT insert '/' characters.
+  # Please do {{.DESTDIR}}{{.OUTDIR}} rather than {{.DESTDIR}}/{{.OUTDIR}}
+  DESTDIR:
+    sh: echo ${DESTDIR:=$(pwd)/../build/api/}
+
+  # see https://github.com/golang/protobuf/issues/143
+  # field_mask is a well known type that is recommend for use with UPDATE
+  # requests and with GET requests where the subject is large. It has been a
+  # google 'well known type' for ages. However due to issues google have with
+  # internal apis overlapping it, it is not published in the same way. There
+  # appears to be an on going effort/pantomime trying to align these public
+  # and internal types. The following variable MUST be included in protoc
+  # --go_out value in order to ensure the generated code has the correct
+  # imports
+  GOPKG_OVERRIDES: ",Mgoogle/protobuf/field_mask.proto=google.golang.org/genproto/protobuf/field_mask"
+
+tasks:
+
+  all:
+    desc: generate api grpc bindings
+    summary: All interfaces
+    dir: ../api
+    deps:
+      - task: assetsv2-api
+    cmds:
+      - |
+        cp -v go.mod {{.DESTDIR}}/
+        cp -v go.sum {{.DESTDIR}}/
+
+  assetsv2-api:
+    summary: Generate the assetsv2 api
+    cmds:
+      - task: any-api
+        vars: {API: "assets/v2/assets" }
+
+  any-api:
+    # dev-notes/build-warts.md#always-set-dir-relative-to-current-task-file
+    dir: ../api
+    # summary: Generate the service grpc stubs, rest http proxy and swagger json for any api
+    #
+    cmds:
+      # Generate the gRPC service stub
+      # Generates the HTTP reverse proxy for the gRPC service.
+      # Generates the swagger definitions for the gRPC service.
+      # Generates the html docs for the gRPC service.
+      - |
+        mkdir -p {{.DESTDIR}}{{.API}}
+        protoc -I . {{.PROTOC_INC}} \
+        --go_out=paths=source_relative:{{.DESTDIR}} \
+        --go-grpc_out=paths=source_relative:{{.DESTDIR}} \
+        --validate_out=lang=go,paths=source_relative:{{.DESTDIR}} \
+        --openapiv2_out={{.DESTDIR}} \
+        --openapiv2_opt disable_default_errors=true \
+        --openapiv2_opt json_names_for_fields=false \
+        --openapiv2_opt logtostderr=true \
+        --grpc-gateway_out=paths=source_relative,logtostderr=true:{{.DESTDIR}} \
+        --plugin /go/bin/protoc-gen-doc \
+        --doc_out={{.DESTDIR}}{{.API}}/ \
+        --doc_opt=confluence_doc.tmpl,confluence.storage \
+        {{.API}}/*.proto
+        cp -v {{.API}}/*.proto {{.DESTDIR}}{{.API}}/
+      # Generate the javascript service stub (speculative - commented out for future)
+      # - protoc  -I. {{.PROTOC_INC}} --js_out=library=api/javascript/{{.API}},binary:. api/{{.API}}/*.proto
+    vars:
+      # These variables capture the locations that .proto files for third party
+      # packages can be found at. The locations can change as a consequence of go
+      # mod module updates, so we require a dynamic approach.  The particularly
+      # grotty bit is the -f  argment - we need to pass -f {{.Dir}} to the go list
+      # command. To do so we have to prevent go template from evaluating it.
+      #
+      PROTO_GEN_GO_DIR:
+        # NOTICE: You need to set GOCACHE for any go commands
+        sh: echo $(GOCACHE=/tmp/jitsuin/rkvstcommon-api/api go list -f {{"{{"}}.Dir{{"}}"}} google.golang.org/protobuf/cmd/protoc-gen-go )
+      GRPC_GATEWAY_DIR:
+        sh: echo $(dirname $(GOCACHE=/tmp/jitsuin/rkvstcommon-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/grpc-ecosystem/grpc-gateway/v2/runtime))
+      ENVOY_VALIDATE:
+        sh: echo $(GOCACHE=/tmp/jitsuin/rkvstcommon-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/envoyproxy/protoc-gen-validate)
+
+      # Global includes used for all protoc invocations.
+      # task sets cwd initially to the directory of the Taskfile.yml
+      PROTOC_INC: "-I {{.ENVOY_VALIDATE}} \
+        -I {{.PROTO_GEN_GO_DIR}} \
+        -I {{.GRPC_GATEWAY_DIR}} \
+          -I /usr/local/api-common-protos-master/"

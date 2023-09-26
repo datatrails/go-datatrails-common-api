@@ -1,0 +1,322 @@
+{{- range .Files}}
+{{- if .Description}}<p>{{.Description | replace "&" "&amp;"}}</p>{{- end}}
+{{- end}}{{- /* range .Files */}}
+<h1>Methods</h1>
+{{- range .Files}}
+{{- range .Services}}
+{{- $service := .}}
+<h2>{{ .Name }}</h2>
+{{- if .Description}}<p>{{.Description | replace "&" "&amp;"}}</p>{{- end}}
+<table data-layout="default" ac:local-id="81556721-3dd3-4e9d-a039-cf985a59316f">
+    <colgroup>
+        <col style="width: 160.0px;" />
+        <col style="width: 160.0px;" />
+        <col style="width: 250.0px;" />
+        <col style="width: 190.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>GRPC Method Name</strong></p></th>
+            <th><p><strong>Request Type</strong></p></th>
+            <th><p><strong>Response Type</strong></p></th>
+            <th><p><strong>Description</strong></p></th>
+        </tr>
+        {{- range .Methods}}
+        <tr>
+            <td><p>{{.Name}}</p></td>
+            <td><p><a href="#{{.RequestLongType}}">{{.RequestLongType}}</a>{{if .RequestStreaming}} stream{{end}}</p></td>
+            <td><p><a href="#{{.ResponseLongType}}">{{.ResponseLongType}}</a>{{if .ResponseStreaming}} stream{{end}}</p></td>
+            <td><p>{{.Description | replace "&" "&amp;"}}</p></td>
+        </tr>
+        {{end}}{{- /* range .Methods */}}
+    </tbody>
+</table>
+{{- range .MethodOptions}}
+{{- $option := .}}
+{{- if eq . "google.api.http"}}
+<table data-layout="default" ac:local-id="4015ea77-d1d8-4d9d-8bc9-9e1b15233143">
+    <colgroup>
+        <col style="width: 160.0px;" />
+        <col style="width: 60.0px;" />
+        <col style="width: 100.0px;" />
+        <col style="width: 440.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>HTTP Endpoints</strong></p></th>
+            <th><p><strong>Verb</strong></p></th>
+            <th><p><strong>GRPC call</strong></p></th>
+            <th><p><strong>Body</strong></p></th>
+        </tr>
+        {{- range $service.MethodsWithOption .}}
+        {{- $name := .Name}}
+        {{- range (.Option $option).Rules}}
+        <tr>
+            <td><p>{{.Pattern}}</p></td>
+            <td><p>{{.Method}}</p></td>
+            <td><p>{{$name}}</p></td>
+            <td><p>{{.Body}}</p></td>
+        </tr>
+        {{- end}}{{- /* range (.Option $option).Rules */}}
+        {{- end}}{{- /* range $service.MethodsWithOption */}}
+    </tbody>
+</table>
+{{- else}}{{- /* eq . "google.api.http" */}}
+<table data-layout="default" ac:local-id="4015ea77-d1d8-4d9d-8bc9-9e1b15233143">
+    <colgroup>
+        <col style="width: 160.0px;" />
+        <col style="width: 60.0px;" />
+        <col style="width: 100.0px;" />
+        <col style="width: 440.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>Methods with {{.}} option</strong></p></th>
+            <th><p><strong>Option</strong></p></th>
+        </tr>
+        {{- range $service.MethodsWithOption .}}
+        <tr>
+            <td><p>{{.Name}}</p></td>
+            <td><p>{{ printf "%+v" (.Option $option)}}</p></td>
+        </tr>
+        {{- end}}{{- /* range $service.MethodsWithOption */}}
+    </tbody>
+</table>
+{{- end}}{{- /* eq . "google.api.http" */}}
+{{- end}}{{- /* range .MethodOptions */}}
+{{- end}}{{- /* range .Services */}}
+{{- end}}{{- /* range .Files */}}
+<h1>Types</h1>
+{{- range .Files}}
+{{- range .Messages}}
+<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:macro-id="4b19e0eb-1e4d-4ff8-9d75-66a33d046a80">
+    <ac:parameter ac:name="">{{.LongName}}</ac:parameter>
+</ac:structured-macro>
+<h2>{{.LongName}}</h2>
+{{- if .Description}}<p>{{.Description | replace "&" "&amp;"}}</p>{{- end}}
+{{- if .HasFields}}
+<table data-layout="default" ac:local-id="f67a39c9-77b9-481e-8d7b-721abe827483">
+    <colgroup>
+        <col style="width: 330.0px;" />
+        <col style="width: 360.0px;" />
+        <col style="width: 200.0px;" />
+        <col style="width: 710.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>Name</strong></p></th>
+            <th><p><strong>Type</strong></p></th>
+            <th><p><strong>Labels</strong></p></th>
+            <th><p><strong>Description</strong></p></th>
+        </tr>
+        {{- range .Fields }}
+        <tr>
+            <td><p>{{.Name}}</p></td>
+            <td><p><a href="#{{.LongType}}">{{.LongType}}</a></p></td>
+            <td><p>{{.Label}}</p></td>
+            <td><p>{{if (index .Options "deprecated"|default false)}}<strong>Deprecated.</strong> {{end}}{{.Description | replace "&" "&amp;"}} {{if .DefaultValue}}Default: {{.DefaultValue}}{{end}}</p></td>
+        </tr>
+        {{- end }}{{- /* range .Fields */}}
+    </tbody>
+</table>
+{{- $message := .}}
+{{- range .FieldOptions }}
+{{- $option := .}}
+{{- if eq . "validator.field" "validate.rules" }}
+<h4>Validated Fields</h4>
+<table data-layout="default" ac:local-id="0ea7c513-0a0b-4348-aa7c-53bc9bc71c5a">
+    <colgroup>
+        <col style="width: 330.0px;" />
+        <col style="width: 1300.0px;" />
+        </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>Field</strong></p></th>
+            <th><p><strong>Validations</strong></p></th>
+        </tr>
+        {{- range $message.FieldsWithOption .}}
+        <tr>
+            <td><p>{{.Name}}</p></td>
+            <td>
+                <ul>
+                {{- range (.Option $option).Rules }}
+                    <li>{{.Name}}: {{.Value}}</li>
+                {{- end}}
+                </ul>
+            </td>
+        </tr>
+        {{- end}}
+    </tbody>
+</table>
+{{- else}}{{- /* eq . "validator.field" "validate.rules" */}}
+<h4>Fields with {{.}} option</h4>
+<table data-layout="default" ac:local-id="0ea7c513-0a0b-4348-aa7c-53bc9bc71c5a">
+    <colgroup>
+        <col style="width: 330.0px;" />
+        <col style="width: 1300.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>Field</strong></p></th>
+            <th><p><strong>Validations</strong></p></th>
+        </tr>
+        {{- range $message.FieldsWithOption .}}
+        <tr>
+            <td><p>{{.Name}}</p></td>
+            <td>
+                <ul>
+                {{- range (.Option $option).Rules}}
+                    <li>{{.Name}}: {{.Value}}</li>
+                {{- end}}
+                </ul>
+            </td>
+        </tr>
+        {{- end}}{{- /* range $message.FieldsWithOption */}}
+    </tbody>
+</table>
+{{- end}}{{- /* eq . "validator.field" "validate.rules" */}}
+{{- end}}{{- /* if .FieldOptions */}}
+{{- if .HasExtensions}}
+<table data-layout="default" ac:local-id="0ea7c513-0a0b-4348-aa7c-53bc9bc71c5a">
+    <colgroup>
+        <col style="width: 300.0px;" />
+        <col style="width: 300.0px;" />
+        <col style="width: 300.0px;" />
+        <col style="width: 300.0px;" />
+        <col style="width: 300.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>Extension</strong></p></th>
+            <th><p><strong>Type</strong></p></th>
+            <th><p><strong>Base</strong></p></th>
+            <th><p><strong>Number</strong></p></th>
+            <th><p><strong>Description</strong></p></th>
+        </tr>
+        {{- range .Extensions}}
+        <tr>
+            <td><p>{{.Name}}</p></td>
+            <td><p>{{.LongType}}</p></td>
+            <td><p>{{.ContainingLongType}}</p></td>
+            <td><p>{{.Number}}</p></td>
+            <td><p>{{.Description | replace "&" "&amp;"}}{{if .DefaultValue}} Default: {{.DefaultValue}}{{end}}</p></p></td>
+        </tr>
+        {{- end}}{{- /* range .Extensions */}}
+    </tbody>
+</table>
+{{- end}}{{- /* if .HasExtensions */}}
+{{- if false }}
+{{- /* TODO: it would be great to generate this from the swagger option.  This syntax probably needs updating for the new confluence storage syntax */}}
+<ac:structured-macro ac:name="code" ac:schema-version="1" ac:macro-id="643ed4d2-96c2-4343-88c8-e54ebcdc69be">
+<ac:plain-text-body><![CDATA[{
+  "display_name": "IAMAccessPolicies POST admin allowed - filters and access_permissions",
+  "filters": [
+    { "or": ["location=basingstoke", "location=cambridge"] },
+    { "or": ["asset_type=door_access_reader"] }
+  ],
+  "access_permissions": [
+    {
+      "subjects": [
+        "subjects/xxxxx-xx-xx-xx",
+        "subjects/yyyyy-yy-yy-yy"
+      ],    
+      "behaviours": ["BEHAVIOUR2","BEHAVIOUR4"],
+      "asset_attributes_read": ["ATTRIBUTE2","ATTRIBUTE4"],
+       "user_attributes": [
+        {"or": ["group=issuer:group_id"]}
+      ]
+    }
+  ]
+}
+]]>
+</ac:plain-text-body>
+</ac:structured-macro>
+{{- end}}{{- /* false */}}
+{{- end}}{{- /* range .HasFields */}}
+{{- end}}{{- /* range .Messages */}}
+{{- range .Enums}}
+<h3 id="{{.FullName}}">{{.LongName}}</h3>
+{{- if .Description}}<p>{{.Description | replace "&" "&amp;"}}</p>{{- end}}
+<table data-layout="default" ac:local-id="c3c18cd5-0914-4312-b0d0-47b95f108465">
+    <colgroup>
+        <col style="width: 300.0px;" />
+        <col style="width: 300.0px;" />
+        <col style="width: 300.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>Name</strong></p></th>
+            <th><p><strong>Number</strong></p></th>
+            <th><p><strong>Description</strong></p></th>
+        </tr>
+        {{- range .Values}}
+        <tr>
+            <td><p>{{.Name}}</p></td>
+            <td><p>{{.Number}}</p></td>
+            <td><p>{{.Description | replace "&" "&amp;"}}</p></td>
+        </tr>
+        {{- end}}{{- /* range .Values */}}
+    </tbody>
+</table>
+{{- end}}{{- /* range .Enums */}}
+{{- if .HasExtensions}}
+<h2>File-level Extensions</h2>
+<table data-layout="default" ac:local-id="c3c18cd5-0914-4312-b0d0-47b95f108465">
+    <colgroup>
+        <col style="width: 300.0px;" />
+        <col style="width: 300.0px;" />
+        <col style="width: 300.0px;" />
+        <col style="width: 300.0px;" />
+        <col style="width: 300.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>Extension</strong></p></th>
+            <th><p><strong>Type</strong></p></th>
+            <th><p><strong>Base</strong></p></th>
+            <th><p><strong>Number</strong></p></th>
+            <th><p><strong>Description</strong></p></th>
+        </tr>
+        {{- range .Extensions}}
+        <tr>
+            <td><p>{{.Name}}</p></td>
+            <td><p>{{.LongType}}</p></td>
+            <td><p>{{.ContainingLongType}}</p></td>
+            <td><p>{{.Number}}</p></td>
+            <td><p>{{.Description | replace "&" "&amp;"}}{{if .DefaultValue}} Default: {{.DefaultValue}}{{end}}</p></p></td>
+        </tr>
+        {{- end}}{{- /* range .Extensions */}}
+    </tbody>
+</table>
+{{- end}}{{- /* if .HasExtensions */}}
+<p />
+{{- end}}{{- /* range .Files */}}
+<h1>Scalar Value Types</h1>
+<table data-layout="default" ac:local-id="c3c18cd5-0914-4312-b0d0-47b95f108465">
+    <tbody>
+        <tr>
+            <td><p><strong>.proto Type</strong></p></td>
+            <td><p><strong>Notes</strong></p></td>
+            <td><p><strong>C++</strong></p></td>
+            <td><p><strong>Java</strong></p></td>
+            <td><p><strong>Python</strong></p></td>
+            <td><p><strong>Go</strong></p></td>
+            <td><p><strong>C#</strong></p></td>
+            <td><p><strong>PHP</strong></p></td>
+            <td><p><strong>Ruby</strong></p></td>
+        </tr>
+        {{range .Scalars}}
+        <tr>
+        <td><p>{{.ProtoType}}<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">{{.ProtoType}}</ac:parameter></ac:structured-macro></p></td>
+        <td><p>{{.Notes}}</p></td>
+        <td><p>{{.CppType}}</p></td>
+        <td><p>{{.JavaType}}</p></td>
+        <td><p>{{.PythonType}}</p></td>
+        <td><p>{{.GoType}}</p></td>
+        <td><p>{{.CSharp}}</p></td>
+        <td><p>{{.PhpType}}</p></td>
+        <td><p>{{.RubyType}}</p></td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>

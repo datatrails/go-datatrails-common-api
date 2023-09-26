@@ -1,0 +1,34 @@
+syntax = "proto3";
+package archivist.rkvstcommon.v2;
+option go_package="githib.com/rkvst/go-rkvstcommon-api-gen/api/assets/v2/assets;assets";
+
+enum ConfirmationStatus {
+    CONFIRMATION_STATUS_UNSPECIFIED = 0;
+    PENDING = 1;        // not yet committed
+    CONFIRMED = 2;      // committed
+    FAILED = 3;         // permanent failure
+}
+
+enum TrackedStatus {
+    TRACKED_STATUS_UNSPECIFIED = 0;
+    TRACKED = 1;
+    NOT_TRACKED = 2;
+    ANY = 3;
+}
+
+/* Specifies how the asset data will be stored. This is set once on creation
+ * and does not change.*/
+enum StorageIntegrity {
+    STORAGE_INTEGRITY_UNSPECIFIED = 0;
+    LEDGER = 1;
+    TENANT_STORAGE = 2;
+}
+
+enum ProofMechanism {
+    PROOF_MECHANISM_UNSPECIFIED = 0;
+    KHIPU = 1;
+    SIMPLE_HASH = 2;
+    TRIE_HASH = 3;
+    TRIE_HASH_MERKLE = 4;
+    TRIE_HASH_VERKLE = 5;
+}

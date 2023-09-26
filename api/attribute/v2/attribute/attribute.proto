@@ -1,0 +1,25 @@
+
+syntax = "proto3";
+//
+// Structured attributes for attributes in assets and locations
+//
+package archivist.rkvstcommon.v2;
+option go_package="githib.com/rkvst/go-rkvstcommon-api-gen/api/assets/v2/assets;assets";
+
+import "validate/validate.proto";
+
+message DictAttr {
+    map<string, string> value = 1 [(validate.rules).map = { keys{string{max_len:1024, not_contains:"."}}, values{string{max_len:4096}}}];
+}
+
+message ListAttr {
+    repeated DictAttr value = 1;
+}
+
+message Attribute {
+    oneof value {
+        string str_val = 1 [(validate.rules).string.max_len = 4096];
+        DictAttr dict_val = 2;
+        ListAttr list_val = 3;
+    }
+}

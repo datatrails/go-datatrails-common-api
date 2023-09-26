@@ -1,0 +1,165 @@
+syntax = "proto3";
+package archivist.rkvstcommon.v2;
+option go_package="githib.com/rkvst/go-rkvstcommon-api-gen/api/assets/v2/assets;assets";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "assets/v2/assets/enums.proto";
+import "assets/v2/assets/principal.proto";
+import "attribute/v2/attribute/attribute.proto";
+
+message EventResponse {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+        json_schema: {
+            description: "This describes RKVST Event."
+        }
+        example:"{ "
+            "\"identity\": \"assets/add30235-1424-4fda-840a-d5ef82c4c96f/events/11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000\", "
+            "\"asset_identity\": \"assets/add30235-1424-4fda-840a-d5ef82c4c96f\", "
+            "\"operation\": \"Record\", "
+            "\"behaviour\": \"RecordEvidence\", "
+            "\"event_attributes\": { "
+            "   \"arc_attachments\": ["
+            "       {"
+            "           \"arc_attachment_identity\": \"blobs/1754b920-cf20-4d7e-9d36-9ed7d479744d\","
+            "           \"arc_hash_value\": \"01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b\","
+            "           \"arc_display_name\": \"Picture from yesterday\","
+            "           \"arc_hash_alg\": \"sha256\""
+            "       }"
+            "   ]"
+            "}, "
+            "\"asset_attributes\": { "
+            "   \"arc_firmware_version\": \"3.2.1\", "
+            "   \"arc_home_location_identity\": \"locations/42054f10-9952-4c10-a082-9fd0d10295ae\""
+            "}, "
+            "\"timestamp_accepted\": \"2019-11-27T14:44:19Z\", "
+            "\"timestamp_declared\": \"2019-11-27T14:44:19Z\", "
+            "\"timestamp_committed\": \"2019-11-27T14:44:19Z\", "
+            "\"principal_declared\": { "
+            "    \"issuer\": \"job.idp.server/1234\", \"subject\":\"bob@job\" "
+            " }, "
+            " \"principal_accepted\": { "
+            "    \"issuer\": \"job.idp.server/1234\", \"subject\":\"bob@job\" "
+            "}, "
+            "\"confirmation_status\": \"CONFIRMED\", "
+            "\"block_number\": 12, "
+            "\"transaction_index\": 5, "
+            "\"transaction_id\": \"0x07569\", "
+            "\"tenant_identity\": \"tenant/8e0b600c-8234-43e4-860c-e95bdcd695a9\" "
+            "}"
+    };
+
+    // Relative Resource Name for the operation event
+    string identity = 1 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "identity of a event resource"
+        read_only: true
+    }];
+
+    // relative resource name for associated asset ( asset the operation is performed on  - has to have specific behaviour enabled)
+    string asset_identity = 2 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "identity of a related asset resource `assets/11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000`"
+        read_only: true
+    }];
+
+    // map of event attributes. Specific behaviours define required and optional event attributes for each supported operation.
+    map<string, Attribute> event_attributes = 16 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "key value mapping of event attributes"
+        }
+    ];
+
+    // map of asset attributes. Specific behaviours define required and optional asset attributes. These attributes cause the corresponding attributes on the asset to be updated.
+    map<string, Attribute> asset_attributes = 17 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "key value mapping of asset attributes"
+        }
+    ];
+
+    // name of operation on this behviour
+    string operation = 4 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "The operation represented by the event. `Record`"
+        read_only: true
+        max_length: 4096
+    }];
+
+    // name of this behaviour
+    string behaviour = 14 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "The behaviour used to create event. `RecordEvidence`"
+        read_only: true
+        max_length: 4096
+    }];
+
+    // timestamp when operation was actually performed - if not provided will be set to timestamp_accepted
+    google.protobuf.Timestamp timestamp_declared = 5 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "time of event as declared by the user"
+        read_only: true
+    }];
+
+    // timestamp when system received operation request
+    google.protobuf.Timestamp timestamp_accepted = 6 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "time of event as recorded by the server"
+        read_only: true
+    }];
+
+    // timestamp operation has been committed on the blockchain
+    google.protobuf.Timestamp timestamp_committed = 7 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "time of event as recorded on blockchain"
+        read_only: true
+    }];
+
+    // principal information associated with event - if not provided will be set to principal_accepted
+    Principal principal_declared = 8 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "principal provided by the user"
+        read_only: true
+        // see https://github.com/grpc-ecosystem/grpc-gateway/blob/master/protoc-gen-openapiv2/options/openapiv2.proto
+        //  for specific types.
+        type: OBJECT
+    }];
+
+    // principal logged into the system that performed the operation
+    Principal principal_accepted = 9 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "principal recorded by the server"
+        read_only: true
+        // see https://github.com/grpc-ecosystem/grpc-gateway/blob/master/protoc-gen-openapiv2/options/openapiv2.proto
+        //  for specific types.
+        type: OBJECT
+    }];
+
+    // indicated if operation has been committed to the blockchain
+    ConfirmationStatus confirmation_status = 10 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "indicates if the event has been succesfully committed to the blockchain"
+        read_only: true
+        // see https://github.com/grpc-ecosystem/grpc-gateway/blob/master/protoc-gen-openapiv2/options/openapiv2.proto
+        //  for specific types.
+        type: STRING
+    }];
+
+    // hash of transaction committing this operation on blockchain
+    string transaction_id = 11 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "hash of the transaction as a hex string `0x11bf5b37e0b842e08dcfdc8c4aefc000`"
+        max_length: 4096
+    }];
+
+    // block number of committing transaction
+    uint64 block_number = 12 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "number of block event was commited on"
+        read_only: true
+    }];
+
+    // transaction index of committing transaction
+    uint64 transaction_index = 13 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "index of event within commited block"
+        read_only: true
+    }];
+
+    // wallet address for the creator of this event
+    string from = 15 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "wallet address for the creator of this event"
+        read_only: true
+    }];
+
+    string tenant_identity = 18 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description:
+        "Identity of the tenant the that created this event"
+        max_length: 1024
+    }];
+}

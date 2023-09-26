@@ -1,0 +1,77 @@
+---
+version: '3'
+
+# This Taskfile represents the primary control surface for developers interacting with
+# this component.
+#
+# Primary "configure/build/deploy/test" tasks must be provided directly in this top level
+# taskfile
+#
+# Infrequently used or pure sub-tasks should be in subservient taskfiles and included
+# here.
+#
+# All tasks that are expected to be run directly by developers must have a meaningful
+# 'desc' with all optional variables defined, in this file or in included files.
+#
+# All tasks that are internal sub-tasks only should have a meaningful 'summary'.
+#
+includes:
+  apis:
+    taskfile: ./taskfiles/Taskfile_apis.yml
+    # dev-notes/build-warts.md#always-set-dir-relative-to-current-task-file
+    dir: ./taskfiles
+
+vars:
+  ACR: rkvstdev.azurecr.io
+  # Default to the stage master-latest builder image
+  # Note: the CI tags builder images with the build number of the avid-builder pipeline run,
+  # i.e. 20220607.10
+  # For local builder development build run `task builder` in the avid-builder git repo to
+  # build a new local builder image, then run these tasks like
+  #  task generate BUILDER_ACR=rkvstdev.azurecr.io BUILDER_IMAGE_TAG=dev-$USER
+  BUILDER_ACR: rkvststage.azurecr.io
+  BUILDER_IMAGE_TAG: master-latest
+
+  BUILD_CONTAINER: rkvstcommon-api-builder
+
+tasks:
+
+  ### -------------------------
+  # Docker container tasks
+  ### -------------------------
+
+  builder-start:
+    summary: |
+      Creates the build container for rkvstcommon-api
+
+      Many tasks docker exec into this container so DO NOT ADD --rm.
+
+      Use defer to cleanup the docker container in top level workflow tasks
+      which create the builder container
+    vars:
+      BUILDER_IMAGE: '{{.BUILDER_ACR}}/avid-builder:{{.BUILDER_IMAGE_TAG}}'
+    cmds:
+      - |
+        docker run \
+          --env CONCURRENCY={{.SKAFFOLD_CONCURRENCY | default 2}} \
+          --name {{.BUILD_CONTAINER}} \
+          -dt -u $(id -u):$(id -g) \
+          --mount type=bind,src=$(pwd),dst=/avid -w /avid \
+          {{.BUILDER_IMAGE}}
+
+  builder-cleanup:
+    summary: cleans up the forestrie build container
+    cmds:
+      - docker rm -f {{.BUILD_CONTAINER}}
+
+  ### -------------------------
+  # Primary workflow tasks 
+  ### -------------------------
+
+  # 2. generate
+  generate:
+    desc: generates all the artifacts we need pre-build
+    cmds:
+      - task: builder-start
+      - defer: {task: builder-cleanup}
+      - docker exec -t {{.BUILD_CONTAINER}} task apis:all

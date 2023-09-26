@@ -1,0 +1,47 @@
+syntax = "proto3";
+package archivist.rkvstcommon.v2;
+option go_package="githib.com/rkvst/go-rkvstcommon-api-gen/api/assets/v2/assets;assets";
+import "validate/validate.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+message Principal {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+        json_schema: {
+            description:
+            "The principal description assured by the configured Identity "
+            " Provider. All values are according to OIDC id token claims and "
+            " standard claims. "
+            " See https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims"
+        }
+        example:'{ "issuer": "job.idp.server/1234", "subject": "bob@job"}'
+    };
+    string issuer = 1 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "optional issuer of the principal identity. Where the issuer is not provided the subject is treated as a free string"
+        max_length: 1024
+    },
+    (validate.rules).string.max_len = 1024];
+
+    string subject = 2 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "unique identifier of the principal (within issuer context)"
+        max_length: 1024
+    },
+    (validate.rules).string.max_len = 1024];
+
+    string display_name = 3 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description:
+        "The displayable name of the end-user. "
+        " The name claim is prefered, followed by email claims, then a composite of "
+        " given_name, middle_name, family_name"
+        max_length: 1024
+    },
+    (validate.rules).string.max_len = 1024];
+
+    string email = 4 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description:
+        "The email for the end-user if available. If email_verified is "
+        " available it is preferd. Empty if neither email_verified or email "
+        " are provided by the IdP"
+        max_length: 1024
+    },
+    (validate.rules).string.max_len = 1024];
+}
