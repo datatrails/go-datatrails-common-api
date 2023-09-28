@@ -1,6 +1,8 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
 syntax = "proto3";
-package archivist.rkvstcommon.v2;
-option go_package="githib.com/rkvst/go-rkvstcommon-api-gen/api/assets/v2/assets;assets";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
 import "validate/validate.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 

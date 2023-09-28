@@ -75,3 +75,10 @@ tasks:
       - task: builder-start
       - defer: {task: builder-cleanup}
       - docker exec -t {{.BUILD_CONTAINER}} task apis:all
+
+  qqq:
+    desc: generates all the artifacts we need pre-build
+    cmds:
+      - task: builder-start
+      - defer: {task: builder-cleanup}
+      - docker exec -t {{.BUILD_CONTAINER}} task apis:all

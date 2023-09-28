@@ -1,0 +1,226 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
+syntax = "proto3";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+
+import "validate/validate.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+import "assets/v2/assets/enums.proto";
+import "assets/v2/assets/principal.proto";
+import "filter/v1/filter/filter.proto";
+import "assets/v2/assets/eventresponse.proto";
+
+message ListEventsRequest {
+
+    // Maximum results per page.
+    int32 page_size = 1 [(validate.rules).int32.gte = 0];
+
+    // The next_page_token returned from a previous list request if any.
+    string page_token = 2;
+
+    // Supported sort orders
+    enum OrderBy {
+        DEFAULT = 0;
+        SIMPLEHASHV1 = 1;
+        SIMPLEHASHV2 = 2;
+    }
+    // Specify the sort order for the results.
+    OrderBy order_by = 3;
+
+    string uuid = 4 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "Specify the Asset UUID where `assets/{uuid}` is the Asset Identity e.g. `add30235-1424-4fda-840a-d5ef82c4c96f` from Identity `assets/add30235-1424-4fda-840a-d5ef82c4c96f`.  Use `-` to list Events for all Assets"
+            read_only: true
+        },
+        (validate.rules).string.pattern = "^(-|[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89aAbB][a-fA-F0-9]{3}-[a-fA-F0-9]{12})$"
+    ];
+
+    // indicates if the asset has been succesfully committed to the blockchain
+    ConfirmationStatus confirmation_status = 5;
+    Principal principal_declared = 6;
+    Principal principal_accepted = 7;
+
+    // what was field 8 called?
+    reserved 8;
+
+    // where are fields 9,10 ?
+
+    // Filtering
+    google.protobuf.Timestamp timestamp_accepted_since = 11 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Only list events when timestamp_accepted is greater"
+    }];
+    google.protobuf.Timestamp timestamp_accepted_before = 12 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Only list events when timestamp_accepted is lesser"
+    }];
+    google.protobuf.Timestamp timestamp_committed_since = 13 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Only list events when timestamp_committed is greater"
+    }];
+    google.protobuf.Timestamp timestamp_committed_before = 14 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Only list events when timestamp_committed is lesser"
+    }];
+    google.protobuf.Timestamp timestamp_declared_since = 15 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Only list events when timestamp_declared is greater"
+    }];
+    google.protobuf.Timestamp timestamp_declared_before = 16 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Only list events when timestamp_declared is lesser"
+    }];
+
+    string operation = 17;
+    string behaviour = 18;
+
+    // user defined event_attributes key max_length: 1024 value max_length: 4096
+    map<string, string> event_attributes = 19 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "key value mapping of event attributes"
+        },
+        // non-empty with no control chars
+        (validate.rules).map.keys.string = {
+            min_len: 1,
+            max_len: 1024,
+            pattern: "^[^[:cntrl:]]+$"
+        }
+    ];
+
+    // user defined asset_attributes key max_length: 1024 value max_length: 4096
+    map<string, string> asset_attributes = 20 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "key value mapping of asset attributes"
+        },
+        // non-empty with no control chars
+        (validate.rules).map.keys.string = {
+            min_len: 1,
+            max_len: 1024,
+            pattern: "^[^[:cntrl:]]+$"
+        }
+    ];
+
+    message AssetQuery {
+        map<string, string> attributes = 1 [
+            (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+                description: "key value mapping of asset attributes"
+            },
+            // non-empty with no control chars
+            (validate.rules).map.keys.string = {
+                min_len: 1,
+                max_len: 1024,
+                pattern: "^[^[:cntrl:]]+$"
+            }
+        ];
+    }
+
+    AssetQuery asset = 21;
+
+    // mechanism for evidential proof for Events on this Asset
+    ProofMechanism proof_mechanism = 22 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "specify the mechanism used to provide evidential proof for Events on this Asset"
+            // see https://github.com/grpc-ecosystem/grpc-gateway/blob/master/protoc-gen-openapiv2/options/openapiv2.proto
+            //  for specific types.
+            type: STRING
+        },
+        (validate.rules).enum.defined_only = true
+    ];
+
+    /*
+    * Outer list AND, inner list INCLUSIVE OR, e.g. [[A, B], [A, B]] "(A OR B) in first position AND (A OR B) in second position (and anything after)"
+    * The behaviour of these filters matches the filters available for
+    * selecting assets in access policies:
+    * On the Access Policy editor page in the UX wire frames, we see locations and a asset_types as two of the items to filter on. A policy that expresses “a policy for all door access readers in Basingstoke or Cambridge”
+    * [
+    *     { "or": ["location=basingstoke", "location=cambridge"] },
+    *     { "or": ["asset_type=door_access_reader"] }
+    * ]
+    */
+    repeated archivist.v1.Filter filters = 23 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "filters"
+        }
+    ];
+}
+
+message ListEventsResponse {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+        json_schema: {
+            description: "A list of event records returned data identical to `EventRecord`"
+        }
+        example: "{"
+        "   \"events\": ["
+        "       {"
+        "           \"identity\": \"assets/add30235-1424-4fda-840a-d5ef82c4c96f/events/11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000\", "
+        "           \"asset_identity\": \"assets/add30235-1424-4fda-840a-d5ef82c4c96f\", "
+        "           \"operation\": \"Record\", "
+        "           \"behaviour\": \"RecordEvidence\", "
+        "           \"event_attributes\": { "
+        "               \"arc_attachments\": ["
+        "                   {"
+        "                       \"arc_attachment_identity\": \"blobs/1754b920-cf20-4d7e-9d36-9ed7d479744d\","
+        "                       \"arc_hash_value\": \"01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b\","
+        "                       \"arc_display_name\": \"Picture from yesterday\","
+        "                       \"arc_hash_alg\": \"sha256\""
+        "                   }"
+        "               ]"
+        "           }, "
+        "           \"asset_attributes\": { "
+        "               \"arc_firmware_version\": \"3.2.1\", "
+        "               \"arc_home_location_identity\": \"locations/42054f10-9952-4c10-a082-9fd0d10295ae\""
+        "           }, "
+        "           \"timestamp_accepted\": \"2019-11-27T14:44:19Z\", "
+        "           \"timestamp_declared\": \"2019-11-27T14:44:19Z\", "
+        "           \"timestamp_committed\": \"2019-11-27T14:44:19Z\", "
+        "           \"principal_declared\": { "
+        "               \"issuer\": \"job.idp.server/1234\", \"subject\":\"bob@job\" "
+        "           }, "
+        "           \"principal_accepted\": { "
+        "               \"issuer\": \"job.idp.server/1234\", \"subject\":\"bob@job\" "
+        "           }, "
+        "           \"confirmation_status\": \"CONFIRMED\", "
+        "           \"block_number\": 12, "
+        "           \"transaction_index\": 5, "
+        "           \"transaction_id\": \"0x07569\", "
+        "           \"tenant_identity\": \"tenant/8e0b600c-8234-43e4-860c-e95bdcd695a9\" "
+        "       },"
+        "       {"
+        "           \"identity\": \"assets/bf330235-1424-4fda-840a-d5ef82c4c96f/events/23c06c48-e0b8-42e0-8dcf-dc8c4fdad123\", "
+        "           \"asset_identity\": \"assets/bf330235-1424-4fda-840a-d5ef82c4c96f\", "
+        "           \"operation\": \"Record\", "
+        "           \"behaviour\": \"RecordEvidence\", "
+        "           \"event_attributes\": { "
+        "               \"arc_attachments\": ["
+        "                   {"
+        "                       \"arc_attachment_identity\": \"blobs/1754b920-cf20-4d7e-9d36-9ed7d479744d\","
+        "                       \"arc_hash_value\": \"01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b\","
+        "                       \"arc_display_name\": \"Picture\","
+        "                       \"arc_hash_alg\": \"sha256\""
+        "                   }"
+        "               ]"
+        "           }, "
+        "           \"asset_attributes\": { "
+        "               \"arc_firmware_version\": \"3.2.1\", "
+        "               \"arc_home_location_identity\": \"locations/42054f10-9952-4c10-a082-9fd0d10295ae\""
+        "           }, "
+        "           \"timestamp_accepted\": \"2019-07-27T14:44:19Z\", "
+        "           \"timestamp_declared\": \"2019-07-27T14:44:19Z\", "
+        "           \"timestamp_committed\": \"2019-07-27T14:44:19Z\", "
+        "           \"principal_declared\": { "
+        "               \"issuer\": \"job.idp.server/1234\", \"subject\":\"bob@job\" "
+        "           }, "
+        "           \"principal_accepted\": { "
+        "               \"issuer\": \"job.idp.server/1234\", \"subject\":\"bob@job\" "
+        "           }, "
+        "           \"confirmation_status\": \"CONFIRMED\", "
+        "           \"block_number\": 13, "
+        "           \"transaction_index\": 6, "
+        "           \"transaction_id\": \"0x12569\", "
+        "           \"tenant_identity\": \"tenant/8e0b600c-8234-43e4-860c-e95bdcd695a9\" "
+        "       }"
+        "   ],"
+        "   \"next_page_token\": \"abcd\""
+        "}"
+    };
+    repeated EventResponse events = 1;
+    // Token to retrieve the next page of results or empty if there are none.
+    string next_page_token = 2;
+}

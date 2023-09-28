@@ -1,0 +1,31 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
+syntax = "proto3";
+//
+// Structured filter for internal list of OR'd condition
+// to be part of filter: [ {or: [foo=bar, baz=fiz]} ]
+//
+package archivist.v1;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/filter/v1/filter;filter";
+
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+
+message Filter {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+        json_schema: {
+            description: "Filter"
+        }
+        example: "{"
+        "      \"or\": [\"group=maintainers\", \"group=supervisors\"]"
+        "    }"
+    };
+    repeated string or = 1 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "The filter list"
+        },
+        (validate.rules).repeated.unique = true,
+        (validate.rules).repeated.items.string.max_len = 1024
+    ];
+}
+

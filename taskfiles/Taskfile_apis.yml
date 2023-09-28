@@ -22,17 +22,13 @@ env_build: &env_build
 vars:
 
   # DESTDIR
-  #
-  # This variable is required (as far as possible) to behave like
-  # https://www.gnu.org/prep/standards/html_node/DESTDIR.html.
-  # We do not have an 'install' task. All tasks which produce 'install'
-  # artifacts will prepend the output paths with DESTDIR. The 'build' target
-  # deals with any awkward outputs
+  # The path, relative to the api dir, where the outputs should be rooted.
   #
   # When using DESTDIR to create output paths, do NOT insert '/' characters.
   # Please do {{.DESTDIR}}{{.OUTDIR}} rather than {{.DESTDIR}}/{{.OUTDIR}}
   DESTDIR:
-    sh: echo ${DESTDIR:=$(pwd)/../build/api/}
+    sh: echo ${DESTDIR:=../build/api/}
+
 
   # see https://github.com/golang/protobuf/issues/143
   # field_mask is a well known type that is recommend for use with UPDATE
@@ -50,23 +46,53 @@ tasks:
   all:
     desc: generate api grpc bindings
     summary: All interfaces
-    dir: ../api
+    dir: '../api'
     deps:
       - task: assetsv2-api
+      - task: attributev2-api
+      - task: capsv1-api
+      - task: filterv1-api
     cmds:
       - |
-        cp -v go.mod {{.DESTDIR}}/
-        cp -v go.sum {{.DESTDIR}}/
+        # The marshalers code is completely hand written and only changes if the
+        # api shape seriously changes
+        cp -vr marshalers {{.DESTDIR}}
+        cp -v go.mod {{.DESTDIR}}
+        cp -v go.sum {{.DESTDIR}}
+      - task: tidy
+
+  tidy:
+    dir: '{{.DESTDIR}}'
+    cmds:
+      - |
+        go mod tidy
 
   assetsv2-api:
     summary: Generate the assetsv2 api
     cmds:
       - task: any-api
         vars: {API: "assets/v2/assets" }
+  attributev2-api:
+    summary: Generate the attributev2 api
+    cmds:
+      - task: any-api
+        vars: {API: "attribute/v2/attribute" }
+
+  capsv1-api:
+    summary: Generate the filters api
+    cmds:
+      - task: any-api
+        vars: {API: "caps/v1/caps" }
+
+  filterv1-api:
+    summary: Generate the filters api
+    cmds:
+      - task: any-api
+        vars: {API: "filter/v1/filter" }
 
   any-api:
     # dev-notes/build-warts.md#always-set-dir-relative-to-current-task-file
-    dir: ../api
+    dir: '../api'
     # summary: Generate the service grpc stubs, rest http proxy and swagger json for any api
     #
     cmds:
@@ -90,8 +116,12 @@ tasks:
         --doc_opt=confluence_doc.tmpl,confluence.storage \
         {{.API}}/*.proto
         cp -v {{.API}}/*.proto {{.DESTDIR}}{{.API}}/
-      # Generate the javascript service stub (speculative - commented out for future)
-      # - protoc  -I. {{.PROTOC_INC}} --js_out=library=api/javascript/{{.API}},binary:. api/{{.API}}/*.proto
+        # We include hand authored helpers in the api paths because the rules
+        # for go packages and private fields make that the only sensible way to
+        # do things.
+        if ls {{.API}}/*.go 1> /dev/null 2>&1; then
+          cp -v {{.API}}/*.go {{.DESTDIR}}{{.API}}/
+        fi
     vars:
       # These variables capture the locations that .proto files for third party
       # packages can be found at. The locations can change as a consequence of go
@@ -112,4 +142,4 @@ tasks:
       PROTOC_INC: "-I {{.ENVOY_VALIDATE}} \
         -I {{.PROTO_GEN_GO_DIR}} \
         -I {{.GRPC_GATEWAY_DIR}} \
-          -I /usr/local/api-common-protos-master/"
+        -I /usr/local/api-common-protos-master/"

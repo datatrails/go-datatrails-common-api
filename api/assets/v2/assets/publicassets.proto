@@ -1,0 +1,93 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
+syntax = "proto3";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "assets/v2/assets/getasset.proto";
+import "assets/v2/assets/assetresponse.proto";
+import "assets/v2/assets/eventresponse.proto";
+import "assets/v2/assets/listevents.proto";
+import "assets/v2/assets/getevent.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "PublicAssets API"
+        description: "API for public asset and event management."
+        version: "2.0"
+        contact: {
+            name: "RKVST"
+            url: "https://www.rkvst.com"
+        }
+    };
+    schemes: HTTPS;
+    consumes: "application/json";
+    produces: "application/json";
+    tags: [
+        {
+            name: "PublicAssets",
+            description: "Retrieve Public Attestations and public Asset and Event records"
+        }
+    ];
+};
+
+service PublicAssets {
+    rpc GetPublicAsset(GetAssetRequest) returns (AssetResponse) {
+        option (google.api.http) = {
+            get: "/archivist/v2/publicassets/{uuid}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Retrieves a specific public Archivist asset",
+            description: "Retrieves a specific public Archivist asset"
+            responses: {
+                key: "404";
+                value: {
+                    description: "Returned when the asset with the id does not exist.";
+                }
+            }
+        };
+    }
+
+    rpc GetPublicEvent(GetEventRequest) returns (EventResponse) {
+        option (google.api.http) =  {
+            get: "/archivist/v2/publicassets/{asset_uuid}/events/{uuid}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Retrieves Archivist event for public asset",
+            description: "Retrieves a specific Archivist event for a public asset"
+            responses: {
+                key: "404";
+                value: {
+                    description: "Returned when the event does not exist.";
+                }
+            }
+        };
+    }
+ 
+    rpc ListPublicEvents(ListEventsRequest) returns (ListEventsResponse) {
+        option (google.api.http) =  {
+            get: "/archivist/v2/publicassets/{uuid}/events"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "List Archivist events for a public asset",
+            description: "Lists Archivist events for a public asset"
+            responses: {
+                key: "206";
+                value: {
+                    description:
+                    "The number of events exceeds the servers limit. "
+                    "The approximate number of matching results is "
+                    "provided by the x-total-count header, the exact "
+                    "limit is available in the content-range header. The "
+                    "value format is 'items 0-LIMIT/TOTAL'. "
+                    " Note that x-total-count is always present for 200 and "
+                    "206 responses. It is the servers best available "
+                    "approximation. Similarly, in any result set, you "
+                    "may get a few more than LIMIT items."
+                }
+            }
+        };
+    }
+}

@@ -1,0 +1,249 @@
+
+<h1>Methods</h1>
+<h1>Types</h1>
+<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:macro-id="4b19e0eb-1e4d-4ff8-9d75-66a33d046a80">
+    <ac:parameter ac:name="">Filter</ac:parameter>
+</ac:structured-macro>
+<h2>Filter</h2>
+<table data-layout="default" ac:local-id="f67a39c9-77b9-481e-8d7b-721abe827483">
+    <colgroup>
+        <col style="width: 330.0px;" />
+        <col style="width: 360.0px;" />
+        <col style="width: 200.0px;" />
+        <col style="width: 710.0px;" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>Name</strong></p></th>
+            <th><p><strong>Type</strong></p></th>
+            <th><p><strong>Labels</strong></p></th>
+            <th><p><strong>Description</strong></p></th>
+        </tr>
+        <tr>
+            <td><p>or</p></td>
+            <td><p><a href="#string">string</a></p></td>
+            <td><p>repeated</p></td>
+            <td><p> </p></td>
+        </tr>
+    </tbody>
+</table>
+<h4>Validated Fields</h4>
+<table data-layout="default" ac:local-id="0ea7c513-0a0b-4348-aa7c-53bc9bc71c5a">
+    <colgroup>
+        <col style="width: 330.0px;" />
+        <col style="width: 1300.0px;" />
+        </colgroup>
+    <tbody>
+        <tr>
+            <th><p><strong>Field</strong></p></th>
+            <th><p><strong>Validations</strong></p></th>
+        </tr>
+        <tr>
+            <td><p>or</p></td>
+            <td>
+                <ul>
+                    <li>repeated.unique: true</li>
+                    <li>repeated.items.string.max_len: 1024</li>
+                </ul>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p />
+<h1>Scalar Value Types</h1>
+<table data-layout="default" ac:local-id="c3c18cd5-0914-4312-b0d0-47b95f108465">
+    <tbody>
+        <tr>
+            <td><p><strong>.proto Type</strong></p></td>
+            <td><p><strong>Notes</strong></p></td>
+            <td><p><strong>C++</strong></p></td>
+            <td><p><strong>Java</strong></p></td>
+            <td><p><strong>Python</strong></p></td>
+            <td><p><strong>Go</strong></p></td>
+            <td><p><strong>C#</strong></p></td>
+            <td><p><strong>PHP</strong></p></td>
+            <td><p><strong>Ruby</strong></p></td>
+        </tr>
+        
+        <tr>
+        <td><p>double<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">double</ac:parameter></ac:structured-macro></p></td>
+        <td><p></p></td>
+        <td><p>double</p></td>
+        <td><p>double</p></td>
+        <td><p>float</p></td>
+        <td><p>float64</p></td>
+        <td><p>double</p></td>
+        <td><p>float</p></td>
+        <td><p>Float</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>float<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">float</ac:parameter></ac:structured-macro></p></td>
+        <td><p></p></td>
+        <td><p>float</p></td>
+        <td><p>float</p></td>
+        <td><p>float</p></td>
+        <td><p>float32</p></td>
+        <td><p>float</p></td>
+        <td><p>float</p></td>
+        <td><p>Float</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>int32<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">int32</ac:parameter></ac:structured-macro></p></td>
+        <td><p>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.</p></td>
+        <td><p>int32</p></td>
+        <td><p>int</p></td>
+        <td><p>int</p></td>
+        <td><p>int32</p></td>
+        <td><p>int</p></td>
+        <td><p>integer</p></td>
+        <td><p>Bignum or Fixnum (as required)</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>int64<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">int64</ac:parameter></ac:structured-macro></p></td>
+        <td><p>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.</p></td>
+        <td><p>int64</p></td>
+        <td><p>long</p></td>
+        <td><p>int/long</p></td>
+        <td><p>int64</p></td>
+        <td><p>long</p></td>
+        <td><p>integer/string</p></td>
+        <td><p>Bignum</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>uint32<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">uint32</ac:parameter></ac:structured-macro></p></td>
+        <td><p>Uses variable-length encoding.</p></td>
+        <td><p>uint32</p></td>
+        <td><p>int</p></td>
+        <td><p>int/long</p></td>
+        <td><p>uint32</p></td>
+        <td><p>uint</p></td>
+        <td><p>integer</p></td>
+        <td><p>Bignum or Fixnum (as required)</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>uint64<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">uint64</ac:parameter></ac:structured-macro></p></td>
+        <td><p>Uses variable-length encoding.</p></td>
+        <td><p>uint64</p></td>
+        <td><p>long</p></td>
+        <td><p>int/long</p></td>
+        <td><p>uint64</p></td>
+        <td><p>ulong</p></td>
+        <td><p>integer/string</p></td>
+        <td><p>Bignum or Fixnum (as required)</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>sint32<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">sint32</ac:parameter></ac:structured-macro></p></td>
+        <td><p>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.</p></td>
+        <td><p>int32</p></td>
+        <td><p>int</p></td>
+        <td><p>int</p></td>
+        <td><p>int32</p></td>
+        <td><p>int</p></td>
+        <td><p>integer</p></td>
+        <td><p>Bignum or Fixnum (as required)</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>sint64<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">sint64</ac:parameter></ac:structured-macro></p></td>
+        <td><p>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.</p></td>
+        <td><p>int64</p></td>
+        <td><p>long</p></td>
+        <td><p>int/long</p></td>
+        <td><p>int64</p></td>
+        <td><p>long</p></td>
+        <td><p>integer/string</p></td>
+        <td><p>Bignum</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>fixed32<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">fixed32</ac:parameter></ac:structured-macro></p></td>
+        <td><p>Always four bytes. More efficient than uint32 if values are often greater than 2^28.</p></td>
+        <td><p>uint32</p></td>
+        <td><p>int</p></td>
+        <td><p>int</p></td>
+        <td><p>uint32</p></td>
+        <td><p>uint</p></td>
+        <td><p>integer</p></td>
+        <td><p>Bignum or Fixnum (as required)</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>fixed64<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">fixed64</ac:parameter></ac:structured-macro></p></td>
+        <td><p>Always eight bytes. More efficient than uint64 if values are often greater than 2^56.</p></td>
+        <td><p>uint64</p></td>
+        <td><p>long</p></td>
+        <td><p>int/long</p></td>
+        <td><p>uint64</p></td>
+        <td><p>ulong</p></td>
+        <td><p>integer/string</p></td>
+        <td><p>Bignum</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>sfixed32<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">sfixed32</ac:parameter></ac:structured-macro></p></td>
+        <td><p>Always four bytes.</p></td>
+        <td><p>int32</p></td>
+        <td><p>int</p></td>
+        <td><p>int</p></td>
+        <td><p>int32</p></td>
+        <td><p>int</p></td>
+        <td><p>integer</p></td>
+        <td><p>Bignum or Fixnum (as required)</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>sfixed64<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">sfixed64</ac:parameter></ac:structured-macro></p></td>
+        <td><p>Always eight bytes.</p></td>
+        <td><p>int64</p></td>
+        <td><p>long</p></td>
+        <td><p>int/long</p></td>
+        <td><p>int64</p></td>
+        <td><p>long</p></td>
+        <td><p>integer/string</p></td>
+        <td><p>Bignum</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>bool<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">bool</ac:parameter></ac:structured-macro></p></td>
+        <td><p></p></td>
+        <td><p>bool</p></td>
+        <td><p>boolean</p></td>
+        <td><p>boolean</p></td>
+        <td><p>bool</p></td>
+        <td><p>bool</p></td>
+        <td><p>boolean</p></td>
+        <td><p>TrueClass/FalseClass</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>string<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">string</ac:parameter></ac:structured-macro></p></td>
+        <td><p>A string must always contain UTF-8 encoded or 7-bit ASCII text.</p></td>
+        <td><p>string</p></td>
+        <td><p>String</p></td>
+        <td><p>str/unicode</p></td>
+        <td><p>string</p></td>
+        <td><p>string</p></td>
+        <td><p>string</p></td>
+        <td><p>String (UTF-8)</p></td>
+        </tr>
+        
+        <tr>
+        <td><p>bytes<ac:structured-macro ac:name="anchor" ac:schema-version="1" ac:local-id="510e24cf-902a-48c4-a9ca-15d9c11ee007" ac:macro-id="358ca23f11a312a9c85b2d4258e342e2"><ac:parameter ac:name="">bytes</ac:parameter></ac:structured-macro></p></td>
+        <td><p>May contain any arbitrary sequence of bytes.</p></td>
+        <td><p>string</p></td>
+        <td><p>ByteString</p></td>
+        <td><p>str</p></td>
+        <td><p>[]byte</p></td>
+        <td><p>ByteString</p></td>
+        <td><p>string</p></td>
+        <td><p>String (ASCII-8BIT)</p></td>
+        </tr>
+        
+    </tbody>
+</table>

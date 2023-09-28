@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+//
+// Caps messages
+//
+package archivist.v1;
+
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/caps/v1/caps;caps";
+
+import "validate/validate.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+message GetCapsRequest {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+        json_schema: {
+            description: "GET Request for remaining capped resource. Placeholder."
+        }
+    };
+}
+
+message Cap {
+    string resource_type = 1 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "String identifying the capped resource type"
+        },
+        (validate.rules).string = {
+            min_len: 1,
+            max_len: 1024
+        }
+    ];
+
+    int64 resource_remaining = 2 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "Number of capped resources remaining"
+        },
+        (validate.rules).int64.gte = -1
+    ];
+
+}
+
+message Caps {
+    repeated Cap caps = 1 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "List of relevant capped resources"
+        }
+    ];
+}

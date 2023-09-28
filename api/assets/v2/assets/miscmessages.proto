@@ -1,0 +1,58 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
+syntax = "proto3";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+import "assets/v2/assets/eventmessage.proto";
+
+// These internal messages are used for the incoming event message path which is
+// done in three stages, khipu assembly, event commit and commit receipt
+
+// EventCommitMessage is used between the khipu assemble and event commit stages
+message EventCommitMessage {
+    reserved 2, 3, 4, 5;
+    EventMessage message = 1;
+    /* repeated bytes khipu_transaction_hashes = 2;*/
+    /* bytes behaviour_contract_address = 3;*/
+    /*bytes asset_contract_address = 4;*/
+    /*repeated string commit_private_for = 5;*/
+    // It is very cumbersome to represent the PackedInput as proto. Instead we
+    // have used go gob for simplicity, but we do want internal schema
+    // versioning hence khipu_packed_input_ver
+    int32 khipu_packed_input_ver = 6; // recievers ignore versions != what they are built against
+    bytes khipu_packed_assembly_inputs = 7;
+    bytes khipu_packed_commit_input = 8;
+}
+
+// EventReceiptMessage is used between the event commit and commit receipt stages
+message EventReceiptMessage {
+    EventMessage message = 1;
+    bytes commit_transaction_hash = 2;
+}
+
+// PublicAssetURLResponse is the public url response when calling the :publicurl verb
+message PublicAssetURLResponse {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+        json_schema: {
+            description:
+            "A url that can be used to access the public asset."
+        }
+        example:'{ "publicurl": "https://app.rkvst.io/archivist/publicassets/add30235-1424-4fda-840a-d5ef82c4c96f"}'
+    };
+    string publicurl = 1;
+}
+
+// PublicEventURLResponse is the public url response when calling the :publicurl verb
+message PublicEventURLResponse {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+        json_schema: {
+            description:
+            "A url that can be used to access the public event."
+        }
+        example:'{ "publicurl": "https://app.rkvst.io/archivist/publicassets/add30235-1424-4fda-840a-d5ef82c4c96f/events/11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000"}'
+    };
+    string publicurl = 1;
+}

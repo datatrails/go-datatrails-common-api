@@ -1,4 +1,4 @@
-module github.com/rkvst/go-rkvstcommon-api-gen/api
+module github.com/rkvst/go-rkvstcommon-api-gen
 // Note: the go code is hosted in github.com/rkvst/go-rkvstcommon-api-gen
 // hence the module name
 
