@@ -6,6 +6,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets"
+	"github.com/rkvst/go-rkvstcommon-api-gen/filter/v1/filter"
 	"github.com/rkvst/go-rkvstcommon/logger"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/reflect/protoreflect"
