@@ -7,17 +7,14 @@ go 1.21
 
 require (
 	github.com/envoyproxy/protoc-gen-validate v0.10.1
-	github.com/golang/protobuf v1.5.3
 	github.com/google/uuid v1.3.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1
 	github.com/rkvst/go-rkvstcommon v0.4.0
 	github.com/stretchr/testify v1.8.4
-	github.com/zeebo/bencode v1.0.0
 	go.mongodb.org/mongo-driver v1.12.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20230822172742-b8732ec3820d
 	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.31.0
-	gotest.tools/v3 v3.5.1
 )
 
 require (
@@ -28,7 +25,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/godbus/dbus/v5 v5.0.4 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/lyft/protoc-gen-star/v2 v2.0.1 // indirect
 	github.com/opencontainers/runtime-spec v1.0.2 // indirect
