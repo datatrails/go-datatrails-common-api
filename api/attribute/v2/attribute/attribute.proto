@@ -1,10 +1,11 @@
-
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
 syntax = "proto3";
 //
 // Structured attributes for attributes in assets and locations
 //
-package archivist.rkvstcommon.v2;
-option go_package="githib.com/rkvst/go-rkvstcommon-api-gen/api/assets/v2/assets;assets";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/attribute/v2/attribute;attribute";
 
 import "validate/validate.proto";
 

@@ -1,0 +1,35 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
+syntax = "proto3";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+
+import "validate/validate.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+message GetAssetRequest {
+    // asset identity
+    string uuid = 1 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "Specify the Asset UUID where `assets/{uuid}` is the Asset Identity e.g. `add30235-1424-4fda-840a-d5ef82c4c96f` from Identity `assets/add30235-1424-4fda-840a-d5ef82c4c96f`"
+            read_only: true
+        },
+        (validate.rules).string.uuid = true
+    ];
+    google.protobuf.Timestamp at_time = 2 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Specify time in the past to show asset data as it was at time specified"
+        read_only: true
+    }];
+}
+
+message GetAssetPublicURLRequest {
+    // asset identity
+    string uuid = 1 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "Specify the Asset UUID where `assets/{uuid}` is the Asset Identity e.g. `add30235-1424-4fda-840a-d5ef82c4c96f` from Identity `assets/add30235-1424-4fda-840a-d5ef82c4c96f`"
+            read_only: true
+        },
+        (validate.rules).string.uuid = true
+    ];
+}

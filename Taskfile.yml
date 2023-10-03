@@ -74,4 +74,4 @@ tasks:
     cmds:
       - task: builder-start
       - defer: {task: builder-cleanup}
-      - docker exec -t {{.BUILD_CONTAINER}} task apis:all
+      - docker exec -t {{.BUILD_CONTAINER}} task apis:generate

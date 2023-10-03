@@ -1,0 +1,96 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
+syntax = "proto3";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+
+import "validate/validate.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+import "assets/v2/assets/principal.proto";
+import "attribute/v2/attribute/attribute.proto";
+
+message CreateEventRequest {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+        json_schema: {
+            description:
+            "Request creating RecordEvidence event "
+            "Specify `operation` to chose which RecordEvidence event to create "
+        }
+        example:"{ "
+            "\"operation\": \"Record\", "
+            "\"behaviour\": \"RecordEvidence\", "
+            "\"event_attributes\": { "
+            "   \"arc_attachments\": ["
+            "       {"
+            "           \"arc_attachment_identity\": \"blobs/1754b920-cf20-4d7e-9d36-9ed7d479744d\","
+            "           \"arc_hash_value\": \"01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b\","
+            "           \"arc_display_name\": \"Picture from yesterday\","
+            "           \"arc_hash_alg\": \"sha256\""
+            "       }"
+            "   ]"
+            "}, "
+            "\"asset_attributes\": { "
+            "   \"arc_firmware_version\": \"3.2.1\", "
+            "   \"arc_home_location_identity\": \"locations/42054f10-9952-4c10-a082-9fd0d10295ae\""
+            "}, "
+            "\"timestamp_declared\": \"2019-11-27T14:44:19Z\", "
+            "\"principal_declared\": { "
+            "    \"issuer\": \"job.idp.server/1234\", \"subject\":\"bob@job\" "
+            " } "
+            "}"
+    };
+
+    // relative resource name for associated asset ( asset the operation is performed on  - has to have specific behaviour enabled)
+    string uuid = 1 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "Specify the Asset UUID where `assets/{uuid}` is the Asset Identity e.g. `add30235-1424-4fda-840a-d5ef82c4c96f` from Identity `assets/add30235-1424-4fda-840a-d5ef82c4c96f`"
+            read_only: true
+        },
+        (validate.rules).string.uuid = true
+    ];
+
+    // name of this behaviour
+    string behaviour = 2 [(validate.rules).string.max_len = 1024];
+
+    // name of operation on this behviour
+    string operation = 3 [(validate.rules).string.max_len = 1024];
+
+    // principal information associated with event - if not provided will be set to principal_accepted
+    Principal principal_declared = 5;
+
+    // timestamp when operation was actually performed - if not provided will be set to timestamp_accepted
+    google.protobuf.Timestamp timestamp_declared = 6 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "time of event as declared by the user"
+        read_only: true
+    }];
+
+    // map of event attributes. Specific behaviours define required and optional event attributes for each supported operation.
+    map<string, Attribute> event_attributes = 7 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "key value mapping of event attributes"
+        },
+        // non-empty with no cntrl chars , no '.' and does not end with '[]'
+        (validate.rules).map.keys.string = {
+            not_contains: ".",
+            min_len: 1,
+            max_len: 1024,
+            pattern: "^[^[:cntrl:]]*?[^[[:cntrl:]]+?[^[:cntrl:]]$|^[^[:cntrl:]]$|^[^[:cntrl:]]*?[^][:cntrl:]]$"
+        }
+    ];
+
+    // map of asset attributes. Specific behaviours define required and optional asset attributes. These attributes cause the corresponding attributes on the asset to be updated.
+    map<string, Attribute> asset_attributes = 8 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "key value mapping of asset attributes"
+        },
+        // non-empty with no cntrl chars , no ',' and does not end with '[]'
+        (validate.rules).map.keys.string = {
+            not_contains: ".",
+            min_len: 1,
+            max_len: 1024,
+            pattern: "^[^[:cntrl:]]*?[^[[:cntrl:]]+?[^[:cntrl:]]$|^[^[:cntrl:]]$|^[^[:cntrl:]]*?[^][:cntrl:]]$"
+        }
+    ];
+}

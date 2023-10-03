@@ -22,17 +22,13 @@ env_build: &env_build
 vars:
 
   # DESTDIR
-  #
-  # This variable is required (as far as possible) to behave like
-  # https://www.gnu.org/prep/standards/html_node/DESTDIR.html.
-  # We do not have an 'install' task. All tasks which produce 'install'
-  # artifacts will prepend the output paths with DESTDIR. The 'build' target
-  # deals with any awkward outputs
+  # The path, relative to the api dir, where the outputs should be rooted.
   #
   # When using DESTDIR to create output paths, do NOT insert '/' characters.
   # Please do {{.DESTDIR}}{{.OUTDIR}} rather than {{.DESTDIR}}/{{.OUTDIR}}
-  DESTDIR:
-    sh: echo ${DESTDIR:=$(pwd)/../build/api/}
+  # Note that making DESTDIR=. does not work (cp same file to same file)
+  DESTDIR: '{{.DESTDIR | default "../exported/api/"}}'
+
 
   # see https://github.com/golang/protobuf/issues/143
   # field_mask is a well known type that is recommend for use with UPDATE
@@ -47,26 +43,93 @@ vars:
 
 tasks:
 
-  all:
+  generate:
     desc: generate api grpc bindings
-    summary: All interfaces
-    dir: ../api
-    deps:
-      - task: assetsv2-api
+    dir: '../api'
+    cmds:
+      - task: preflight
+      - task: all-api
+      - task: postflight
+
+  export:
+    desc: export the sources to the desired DESTDIR
+    dir: '../api'
+    vars:
+      SOURCES: >-
+        marshalers
+        go.mod
+        go.sum
+      APIS: >-
+        assets/v2/assets
+        attribute/v2/attribute
+        caps/v1/caps
+        filter/v1/filter
     cmds:
       - |
-        cp -v go.mod {{.DESTDIR}}/
-        cp -v go.sum {{.DESTDIR}}/
+        mkdir -p {{.DESTDIR}}
+        for name in {{.SOURCES}}; do
+          cp -vr ${name} {{.DESTDIR}}
+        done
+        for api in {{.APIS}}; do
+          mkdir -vp {{.DESTDIR}}${api}
+          cp -vr ${api}/*.go {{.DESTDIR}}${api}/
+          cp -vr ${api}/*.swagger.json {{.DESTDIR}}${api}/
+          cp -vr ${api}/*.proto {{.DESTDIR}}${api}/
+        done
+
+
+  all-api:
+    summary: generate code for all interfaces and copy related sources
+    dir: '../api'
+    deps:
+      - task: assetsv2-api
+      - task: attributev2-api
+      - task: capsv1-api
+      - task: filterv1-api
+    cmds:
+      # dummy command, so api gen runs in parallel (deps do this automatically)
+      - true
+
+  preflight:
+    summary: run prior to api generation tasks
+    dir: '../api'
+    cmds:
+      - |
+        go mod download
+
+  postflight:
+    summary: run after all api generation tasks
+    dir: '../api'
+    cmds:
+      - |
+        go mod tidy
 
   assetsv2-api:
     summary: Generate the assetsv2 api
     cmds:
       - task: any-api
         vars: {API: "assets/v2/assets" }
+  attributev2-api:
+    summary: Generate the attributev2 api
+    cmds:
+      - task: any-api
+        vars: {API: "attribute/v2/attribute" }
+
+  capsv1-api:
+    summary: Generate the filters api
+    cmds:
+      - task: any-api
+        vars: {API: "caps/v1/caps" }
+
+  filterv1-api:
+    summary: Generate the filters api
+    cmds:
+      - task: any-api
+        vars: {API: "filter/v1/filter" }
 
   any-api:
     # dev-notes/build-warts.md#always-set-dir-relative-to-current-task-file
-    dir: ../api
+    dir: '../api'
     # summary: Generate the service grpc stubs, rest http proxy and swagger json for any api
     #
     cmds:
@@ -75,23 +138,19 @@ tasks:
       # Generates the swagger definitions for the gRPC service.
       # Generates the html docs for the gRPC service.
       - |
-        mkdir -p {{.DESTDIR}}{{.API}}
         protoc -I . {{.PROTOC_INC}} \
-        --go_out=paths=source_relative:{{.DESTDIR}} \
-        --go-grpc_out=paths=source_relative:{{.DESTDIR}} \
-        --validate_out=lang=go,paths=source_relative:{{.DESTDIR}} \
-        --openapiv2_out={{.DESTDIR}} \
-        --openapiv2_opt disable_default_errors=true \
-        --openapiv2_opt json_names_for_fields=false \
-        --openapiv2_opt logtostderr=true \
-        --grpc-gateway_out=paths=source_relative,logtostderr=true:{{.DESTDIR}} \
-        --plugin /go/bin/protoc-gen-doc \
-        --doc_out={{.DESTDIR}}{{.API}}/ \
-        --doc_opt=confluence_doc.tmpl,confluence.storage \
-        {{.API}}/*.proto
-        cp -v {{.API}}/*.proto {{.DESTDIR}}{{.API}}/
-      # Generate the javascript service stub (speculative - commented out for future)
-      # - protoc  -I. {{.PROTOC_INC}} --js_out=library=api/javascript/{{.API}},binary:. api/{{.API}}/*.proto
+         --go_out=paths=source_relative:. \
+         --go-grpc_out=paths=source_relative:. \
+         --validate_out=lang=go,paths=source_relative:. \
+         --openapiv2_out=. \
+         --openapiv2_opt disable_default_errors=true \
+         --openapiv2_opt json_names_for_fields=false \
+         --openapiv2_opt logtostderr=true \
+         --grpc-gateway_out=paths=source_relative,logtostderr=true:. \
+         --plugin /go/bin/protoc-gen-doc \
+         --doc_out={{.API}}/ \
+         --doc_opt=confluence_doc.tmpl,confluence.storage \
+         {{.API}}/*.proto
     vars:
       # These variables capture the locations that .proto files for third party
       # packages can be found at. The locations can change as a consequence of go
@@ -112,4 +171,4 @@ tasks:
       PROTOC_INC: "-I {{.ENVOY_VALIDATE}} \
         -I {{.PROTO_GEN_GO_DIR}} \
         -I {{.GRPC_GATEWAY_DIR}} \
-          -I /usr/local/api-common-protos-master/"
+        -I /usr/local/api-common-protos-master/"

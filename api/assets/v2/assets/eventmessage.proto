@@ -1,0 +1,47 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
+syntax = "proto3";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+
+import "assets/v2/assets/eventresponse.proto";
+import "assets/v2/assets/assetresponse.proto";
+
+// This internal message is used extensively to pass events through the system
+// message buses, both incoming to the DLT and outgoing from the DLT
+//
+// Caveat:
+// The new incompatible version of go protobufs contains a non-copyable mutex.
+// See https://stackoverflow.com/questions/64183794/why-do-the-go-generated-protobuf-files-contain-mutex-locks
+//
+// google fix this by using this type of copying i.e. reconstruction of a new message.
+// e.g. https://github.com/googleapis/google-cloud-go/issues/2397
+//
+// The general rule is: do **not** pass protobuf messages by value - always pass by reference
+//
+// Ref: https://pkg.go.dev/google.golang.org/protobuf/internal/pragma#DoNotCopy
+
+message EventMessage {
+    EventResponse event = 1;
+    AssetResponse asset = 2;
+    string tenant_id = 3;
+    string failed_reason = 4;
+
+    // asset_create2_factory of the asset contract that exported the asset rlp
+    // (from which the AssetResponse is made). identifies the asset contract
+    // which enacted the change. The factory changes when the subjective value
+    // chain membership changes, and if the factory itself needs upgrading
+    // (which is very rare). So this value is a very clear (and easily
+    // accessible) chain level record of who the SVC value chain colaborators
+    // were when the change was made. All changes to an asset which share the
+    // same factory can only have been enacted by a combination of the
+    // privateFor's for whome the factory was deployed.
+    string asset_create2_factory = 5;
+
+    // event_create2_factory of the behaviour contract that exported the event
+    // rlp (from which the EventResponse is made). identifies the behaviour
+    // contract which enacted the change. The factory changes when the
+    // subjective value chain membership changes, and if the factory itself
+    // needs upgrading (which is very rare)
+    string event_create2_factory = 6;
+}

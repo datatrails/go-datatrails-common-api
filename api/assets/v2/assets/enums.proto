@@ -1,6 +1,6 @@
 syntax = "proto3";
-package archivist.rkvstcommon.v2;
-option go_package="githib.com/rkvst/go-rkvstcommon-api-gen/api/assets/v2/assets;assets";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
 
 enum ConfirmationStatus {
     CONFIRMATION_STATUS_UNSPECIFIED = 0;
@@ -31,4 +31,10 @@ enum ProofMechanism {
     TRIE_HASH = 3;
     TRIE_HASH_MERKLE = 4;
     TRIE_HASH_VERKLE = 5;
+}
+
+enum Privacy {
+    PRIVACY_UNSPECIFIED = 0;
+    RESTRICTED = 1;
+    PUBLIC = 2;
 }

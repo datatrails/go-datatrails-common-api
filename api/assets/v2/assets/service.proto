@@ -1,0 +1,346 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
+syntax = "proto3";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+import "assets/v2/assets/assetresponse.proto";
+import "assets/v2/assets/createasset.proto";
+import "assets/v2/assets/createevent.proto";
+import "assets/v2/assets/eventresponse.proto";
+import "assets/v2/assets/getasset.proto";
+import "assets/v2/assets/getevent.proto";
+import "assets/v2/assets/listassets.proto";
+import "assets/v2/assets/listevents.proto";
+import "assets/v2/assets/miscmessages.proto";
+import "caps/v1/caps/caps.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "Assets API"
+        description: "API for asset and event management."
+        version: "2.0"
+        contact: {
+            name: "RKVST"
+            url: "https://www.rkvst.com"
+        }
+    };
+    base_path: "/_api";
+    schemes: HTTPS;
+    consumes: "application/json";
+    produces: "application/json";
+    tags: [
+        {
+            name: "Assets & Events",
+            description: "Primary API for Asset management"
+        },
+        {
+            name: "Unsupported",
+            description: "Internal APIs that are unstable and should not be used in a production setting."
+        }
+   ];
+};
+
+service Events {
+    rpc Create(CreateEventRequest) returns (EventResponse) {
+        option (google.api.http) = {
+            post: "/archivist/v2/assets/{uuid}/events"
+            body: "*"
+        };
+    }
+}
+
+service Assets {
+    rpc ListAssets(ListAssetsRequest) returns (ListAssetsResponse) {
+        option (google.api.http) =  {
+            get: "/archivist/v2/assets"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            tags: [ "Assets & Events" ]
+            summary: "List Archivist assets"
+            description: "Retrieves a list of Archivist assets"
+            responses: {
+                key: "206";
+                value: {
+                    description:
+                    "The number of assets exceeds the servers limit. "
+                    "The approximate number of matching results is provided by the "
+                    "x-total-count header if the 'x-request-total-count' header on the "
+                    "request is set to 'true'. The exact limit is available in the "
+                    "content-range header. The value format is "
+                    "'items 0-LIMIT/TOTAL'. Note that x-total-count is always "
+                    "present for 200 and 206 responses. It is the servers best "
+                    "available approximation. Similarly, in any result set, "
+                    "you may get a few more than LIMIT items."
+                }
+            }
+            responses: {
+                key: "401";
+                value: {
+                    description: "Returned when the user is not authenticated to the system."
+                }
+            }
+            responses: {
+                key: "403";
+                value: {
+                    description: "Returned when the user is not authorized to list Assets.";
+                }
+            }
+            responses: {
+                key: "429";
+                value: {
+                    description: "Returned when a user exceeds their subscription's rate limit for requests.";
+                }
+            }
+        };
+    }
+
+    rpc CreateAsset(CreateAssetRequest) returns (AssetResponse) {
+        option (google.api.http) = {
+            post: "/archivist/v2/assets"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            tags: [ "Assets & Events" ]
+            summary: "Create an Archivist asset"
+            description: "Creates an Archivist asset"
+            responses: {
+                key: "401";
+                value: {
+                    description: "Returned when the user is not authenticated to the system."
+                }
+            }
+            responses: {
+                key: "402";
+                value: {
+                    description: "Returned when the user either has not enabled blockchain storage or"
+                                 "the number of assets would exceed the user's quota"
+                }
+            }
+            responses: {
+                key: "403";
+                value: {
+                    description: "Returned when the user is not authorized to create an Asset.";
+                }
+            }
+            responses: {
+                key: "429";
+                value: {
+                    description: "Returned when a user exceeds their subscription's rate limit for requests.";
+                }
+            }
+        };
+    }
+
+    rpc GetAsset(GetAssetRequest) returns (AssetResponse) {
+        option (google.api.http) = {
+            get: "/archivist/v2/assets/{uuid}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            tags: [ "Assets & Events" ]
+            summary: "Retrieves a specific Archivist asset"
+            description: "Retrieves a specific Archivist asset"
+            responses: {
+                key: "401";
+                value: {
+                    description: "Returned when the user is not authenticated to the system."
+                }
+            }
+            responses: {
+                key: "403";
+                value: {
+                    description: "Returned when the user is not authorized to view an Asset.";
+                }
+            }
+            responses: {
+                key: "404";
+                value: {
+                    description: "Returned when the asset with the id does not exist.";
+                }
+            }
+            responses: {
+                key: "429";
+                value: {
+                    description: "Returned when a user exceeds their subscription's rate limit for requests.";
+                }
+            }
+        };
+    }
+
+    rpc GetAssetPublicURL(GetAssetPublicURLRequest) returns (PublicAssetURLResponse) {
+        option (google.api.http) = {
+            get: "/archivist/v2/assets/{uuid}:publicurl"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            tags: [ "Assets & Events" ]
+            summary: "Retrieves the public url for a specific Archivist asset."
+            description: "Retrieves the public url for a specific Archivist asset."
+            responses: {
+                key: "401";
+                value: {
+                    description: "Returned when the user is not authenticated to the system."
+                }
+            }
+            responses: {
+                key: "403";
+                value: {
+                    description: "Returned when the user is not authorized to view an Asset.";
+                }
+            }
+            responses: {
+                key: "404";
+                value: {
+                    description: "Returned when the asset with the id does not exist.";
+                }
+            }
+            responses: {
+                key: "429";
+                value: {
+                    description: "Returned when a user exceeds their subscription's rate limit for requests.";
+                }
+            }
+        };
+    }
+
+    rpc GetEvent(GetEventRequest) returns (EventResponse) {
+        option (google.api.http) =  {
+            get: "/archivist/v2/assets/{asset_uuid}/events/{uuid}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            tags: [ "Assets & Events" ]
+            summary: "Retrieves Archivist event"
+            description: "Retrieves a specific Archivist event"
+            responses: {
+                key: "401";
+                value: {
+                    description: "Returned when the user is not authenticated to the system."
+                }
+            }
+            responses: {
+                key: "403";
+                value: {
+                    description: "Returned when the user is not authorized to view Event.";
+                }
+            }
+            responses: {
+                key: "404";
+                value: {
+                    description: "Returned when the event does not exist.";
+                }
+            }
+            responses: {
+                key: "429";
+                value: {
+                    description: "Returned when a user exceeds their subscription's rate limit for requests.";
+                }
+            }
+        };
+    }
+
+    rpc GetEventPublicURL(GetEventRequest) returns (PublicEventURLResponse) {
+        option (google.api.http) = {
+            get: "/archivist/v2/assets/{asset_uuid}/events/{uuid}:publicurl"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            tags: [ "Assets & Events" ]
+            summary: "Retrieves the public url for a specific Archivist event."
+            description: "Retrieves the public url for a specific Archivist event."
+            responses: {
+                key: "401";
+                value: {
+                    description: "Returned when the user is not authenticated to the system."
+                }
+            }
+            responses: {
+                key: "403";
+                value: {
+                    description: "Returned when the user is not authorized to view an Asset.";
+                }
+            }
+            responses: {
+                key: "404";
+                value: {
+                    description: "Returned when the asset with the id does not exist.";
+                }
+            }
+            responses: {
+                key: "429";
+                value: {
+                    description: "Returned when a user exceeds their subscription's rate limit for requests.";
+                }
+            }
+        };
+    }
+
+    rpc ListEvents(ListEventsRequest) returns (ListEventsResponse) {
+        option (google.api.http) =  {
+            get: "/archivist/v2/assets/{uuid}/events"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            tags: [ "Assets & Events" ]
+            summary: "List Archivist events"
+            description: "Lists Archivist events"
+            responses: {
+                key: "206";
+                value: {
+                    description:
+                    "The number of events exceeds the servers limit. "
+                    "The approximate number of matching results is "
+                    "provided by the x-total-count header, the exact "
+                    "limit is available in the content-range header. The "
+                    "value format is 'items 0-LIMIT/TOTAL'. "
+                    " Note that x-total-count is always present for 200 and "
+                    "206 responses. It is the servers best available "
+                    "approximation. Similarly, in any result set, you "
+                    "may get a few more than LIMIT items."
+                }
+            }
+
+            responses: {
+                key: "401";
+                value: {
+                    description: "Returned when the user is not authenticated to the system."
+                }
+            }
+            responses: {
+                key: "403";
+                value: {
+                    description: "Returned when the user is not authorized to list Events.";
+                }
+            }
+            responses: {
+                key: "429";
+                value: {
+                    description: "Returned when a user exceeds their subscription's rate limit for requests.";
+                }
+            }
+        };
+    }
+
+    rpc GetCaps(archivist.v1.GetCapsRequest) returns (archivist.v1.Caps) {
+        option (google.api.http) =  {
+            get: "/archivist/v2/assets:caps"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            tags: [ "Assets & Events", "Unsupported" ]  // Unsupported is signal for future OAPI parsing
+            summary: "Get remaining capped resources for Assets"
+            description: "Not stable or officially supported. Get remaining capped resources for Assets"
+            responses: {
+                key: "401";
+                value: {
+                    description: "Returned when the user is not authenticated to the system."
+                }
+            }
+            responses: {
+                key: "429";
+                value: {
+                    description: "Returned when a user exceeds their subscription's rate limit for requests.";
+                }
+            }
+        };
+    }
+}

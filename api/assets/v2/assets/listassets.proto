@@ -1,0 +1,157 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
+syntax = "proto3";
+package archivist.v2;
+option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+
+import "validate/validate.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+import "filter/v1/filter/filter.proto";
+import "assets/v2/assets/enums.proto";
+import "assets/v2/assets/assetresponse.proto";
+
+
+message ListAssetsRequest {
+    // Maximum results per page.
+    int32 page_size = 1 [(validate.rules).int32.gte = 0];
+
+    // The next_page_token returned from a previous list request if any.
+    string page_token = 2;
+
+    // Supported sort orders
+    enum OrderBy {
+        DEFAULT = 0;
+        SIMPLEHASHV1 = 1;
+        SIMPLEHASHV2 = 2;
+    }
+
+    // Specify the sort order for the results.
+    OrderBy order_by = 3;
+
+    // indicates whether asset is still being tracked in the system
+    TrackedStatus tracked = 4;
+
+    // indicates if the asset has been succesfully committed to the blockchain
+    ConfirmationStatus confirmation_status = 5;
+
+    // user defined attributes key max_length: 1024 value max_length: 4096
+    map<string, string> attributes = 6 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "user defined attributes"
+        },
+        // non-empty with no control chars
+        (validate.rules).map.keys.string = {
+            min_len: 1,
+            max_len: 1024,
+            pattern: "^[^[:cntrl:]]+$"
+        }
+    ];
+
+    // XXX: #4483 DEPRECATED use proof_mechanism
+    StorageIntegrity storage_integrity = 7 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "DEPRECATED use proof_mechanism"
+        }
+    ];
+    // proof mechanism of the asset (and all its events)
+    ProofMechanism proof_mechanism = 8 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "the mechanism used to provide evidential proof",
+        }
+    ];
+
+    string chain_id = 9 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "chain id of the blockchain associated with this asset"
+            read_only: true
+        }
+    ];
+
+    /*
+    * Outer list AND, inner list INCLUSIVE OR, e.g. [[A, B], [A, B]] "(A OR B) in first position AND (A OR B) in second position (and anything after)"
+    * The behaviour of these filters matches the filters available for
+    * selecting assets in access policies:
+    * On the Access Policy editor page in the UX wire frames, we see locations and a asset_types as two of the items to filter on. A policy that expresses “a policy for all door access readers in Basingstoke or Cambridge”
+    * [
+    *     { "or": ["location=basingstoke", "location=cambridge"] },
+    *     { "or": ["asset_type=door_access_reader"] }
+    * ]
+    */
+    repeated archivist.v1.Filter filters = 10 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "filters"
+        }
+    ];
+
+    reserved 11;
+    reserved "public";
+
+    // privacy filter of the asset (and all its events)
+    Privacy privacy = 12 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "the privacy status of the asset"
+        },
+        (validate.rules).enum.defined_only = true
+    ];
+}
+
+message ListAssetsResponse {
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+        json_schema: {
+            description: "A list of assets returned data identical to `Asset`"
+        }
+        example: "{"
+            "   \"assets\": ["
+            "       {"
+            "           \"identity\": \"assets/add30235-1424-4fda-840a-d5ef82c4c96f\", "
+            "           \"behaviours\": [\"RecordEvidence\"], "
+            "           \"attributes\": { "
+            "               \"arc_firmware_version\": \"3.2.1\", "
+            "               \"arc_attachments\": ["
+            "                   {"
+            "                       \"arc_attachment_identity\": \"blobs/1754b920-cf20-4d7e-9d36-9ed7d479744d\","
+            "                       \"arc_hash_value\": \"01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b\","
+            "                       \"arc_display_name\": \"Picture from yesterday\","
+            "                       \"arc_hash_alg\": \"sha256\""
+            "                   }"
+            "               ],"
+            "               \"arc_home_location_identity\": \"locations/42054f10-9952-4c10-a082-9fd0d10295ae\""
+            "           }, "
+            "           \"confirmation_status\": \"PENDING\", "
+            "           \"tracked\": \"TRACKED\", "
+            "           \"owner\": \"0x601f5A7D3e6dcB55e87bf2F17bC8A27AaCD3511\","
+            "           \"at_time\": \"2019-11-27T14:44:19Z\", "
+            "           \"proof_mechanism\": \"SIMPLE_HASH\","
+            "           \"public\": false,"
+            "           \"tenant_identity\": \"tenant/8e0b600c-8234-43e4-860c-e95bdcd695a9\" "
+            "       },"
+            "       {"
+            "           \"identity\": \"assets/cef61346-2453-5aeb-921c-e6fa93d5b032\", "
+            "           \"behaviours\": [\"RecordEvidence\"], "
+            "           \"attributes\": { "
+            "               \"arc_firmware_version\": \"3.2.1\", "
+            "               \"arc_attachments\": ["
+            "                   {"
+            "                       \"arc_attachment_identity\": \"blobs/2865ca31-d01f-5e6f-4621-de562470732e\","
+            "                       \"arc_hash_value\": \"12bc4819d90b6fe911b091a7c05134b65edfce045e09b048caaa7916ecdd458c\","
+            "                       \"arc_display_name\": \"Picture\","
+            "                       \"arc_hash_alg\": \"sha256\""
+            "                   }"
+            "               ],"
+            "               \"arc_home_location_identity\": \"locations/53165a2c-6054-dd68-f093-a0e1e21304fd\""
+            "           }, "
+            "           \"confirmation_status\": \"PENDING\", "
+            "           \"tracked\": \"TRACKED\", "
+            "           \"owner\": \"0x601f5A7D3e6dcB55e87bf2F17bC8A27AaCD3511\","
+            "           \"at_time\": \"2019-11-27T14:44:19Z\", "
+            "           \"proof_mechanism\": \"KHIPU\","
+            "           \"public\": false,"
+            "           \"tenant_identity\": \"tenant/8e0b600c-8234-43e4-860c-e95bdcd695a9\" "
+            "       }"
+            "   ],"
+            "   \"next_page_token\": \"abcd\""
+            "}"
+    };
+    repeated AssetResponse assets = 1;
+    // Token to retrieve the next page of results or empty if there are none.
+    string next_page_token = 2;
+}

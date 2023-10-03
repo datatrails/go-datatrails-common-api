@@ -1,3 +1,5 @@
-*.go
+*.pb.go
+*.pb.gw.go
+*.pb.validate.go
 *.json
 *.storage
