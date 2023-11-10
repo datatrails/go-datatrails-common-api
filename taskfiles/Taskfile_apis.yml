@@ -16,7 +16,7 @@ env_build: &env_build
 
   # The GOCACHE in a linux container on Docker for windows MUST be on a linuxy
   # file system
-  GOCACHE: /tmp/jitsuin/rkvstcommon-api
+  GOCACHE: /tmp/jitsuin/datatrails-common-api
 
 
 vars:
@@ -160,11 +160,11 @@ tasks:
       #
       PROTO_GEN_GO_DIR:
         # NOTICE: You need to set GOCACHE for any go commands
-        sh: echo $(GOCACHE=/tmp/jitsuin/rkvstcommon-api/api go list -f {{"{{"}}.Dir{{"}}"}} google.golang.org/protobuf/cmd/protoc-gen-go )
+        sh: echo $(GOCACHE=/tmp/jitsuin/datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} google.golang.org/protobuf/cmd/protoc-gen-go )
       GRPC_GATEWAY_DIR:
-        sh: echo $(dirname $(GOCACHE=/tmp/jitsuin/rkvstcommon-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/grpc-ecosystem/grpc-gateway/v2/runtime))
+        sh: echo $(dirname $(GOCACHE=/tmp/jitsuin/datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/grpc-ecosystem/grpc-gateway/v2/runtime))
       ENVOY_VALIDATE:
-        sh: echo $(GOCACHE=/tmp/jitsuin/rkvstcommon-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/envoyproxy/protoc-gen-validate)
+        sh: echo $(GOCACHE=/tmp/jitsuin/datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/envoyproxy/protoc-gen-validate)
 
       # Global includes used for all protoc invocations.
       # task sets cwd initially to the directory of the Taskfile.yml

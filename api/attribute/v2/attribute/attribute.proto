@@ -5,7 +5,7 @@ syntax = "proto3";
 // Structured attributes for attributes in assets and locations
 //
 package archivist.v2;
-option go_package="github.com/rkvst/go-rkvstcommon-api-gen/attribute/v2/attribute;attribute";
+option go_package="github.com/datatrails/go-datatrails-common-api-gen/attribute/v2/attribute;attribute";
 
 import "validate/validate.proto";
 

@@ -2,7 +2,7 @@
 //     https://developers.google.com/protocol-buffers/docs/style
 syntax = "proto3";
 package archivist.v2;
-option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+option go_package="github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets;assets";
 
 import "validate/validate.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
@@ -14,7 +14,7 @@ import "attribute/v2/attribute/attribute.proto";
 message CreateAssetRequest {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
         json_schema: {
-            description: "This describes the body of a request to create new RKVST Asset."
+            description: "This describes the body of a request to create new DataTrails Asset."
         }
         example:"{ "
             "\"behaviours\": [\"RecordEvidence\"], "

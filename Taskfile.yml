@@ -32,7 +32,7 @@ vars:
   BUILDER_ACR: rkvststage.azurecr.io
   BUILDER_IMAGE_TAG: master-latest
 
-  BUILD_CONTAINER: rkvstcommon-api-builder
+  BUILD_CONTAINER: datatrails-common-api-builder
 
 tasks:
 
@@ -42,7 +42,7 @@ tasks:
 
   builder-start:
     summary: |
-      Creates the build container for rkvstcommon-api
+      Creates the build container for datatrails-common-api
 
       Many tasks docker exec into this container so DO NOT ADD --rm.
 

@@ -2,7 +2,7 @@
 //     https://developers.google.com/protocol-buffers/docs/style
 syntax = "proto3";
 package archivist.v2;
-option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+option go_package="github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets;assets";
 
 import "google/api/annotations.proto";
 import "validate/validate.proto";
@@ -25,8 +25,8 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
         description: "API for asset and event management."
         version: "2.0"
         contact: {
-            name: "RKVST"
-            url: "https://www.rkvst.com"
+            name: "DataTrails"
+            url: "https://www.datatrails.com"
         }
     };
     base_path: "/_api";

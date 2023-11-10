@@ -14,8 +14,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
-	v2attribute "github.com/rkvst/go-rkvstcommon-api-gen/attribute/v2/attribute"
-	"github.com/rkvst/go-rkvstcommon/logger"
+	v2attribute "github.com/datatrails/go-datatrails-common-api-gen/attribute/v2/attribute"
+	"github.com/datatrails/go-datatrails-common/logger"
 )
 
 type SnakeMarshaler struct {

@@ -2,7 +2,7 @@
 //     https://developers.google.com/protocol-buffers/docs/style
 syntax = "proto3";
 package archivist.v2;
-option go_package="github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets;assets";
+option go_package="github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets;assets";
 
 import "protoc-gen-openapiv2/options/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -16,7 +16,7 @@ import "attribute/v2/attribute/attribute.proto";
 message AssetResponse {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
         json_schema: {
-            description: "This describes RKVST Asset."
+            description: "This describes DataTrails Asset."
         }
         example:"{ "
             "\"identity\": \"assets/add30235-1424-4fda-840a-d5ef82c4c96f\", "
