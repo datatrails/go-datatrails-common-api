@@ -55,7 +55,7 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/prashantv/gostub v1.1.0 h1:BTyx3RfQjRHnUWaGF9oQos79AlQ5k8WNktv7VGvVH4g=
 github.com/prashantv/gostub v1.1.0/go.mod h1:A5zLQHz7ieHGG7is6LLXLz7I8+3LZzsrV0P1IAHhP5U=
 github.com/datatrails/go-datatrails-common v0.4.0 h1:kt0F7eP73ybfSUkVbWXJtFm3XbIO0FKvuSjBjs0Q0+E=
-github.com/datatrails/go-datatrails- v0.4.0/go.mod h1:M0Mi6v/2Jgbc5se2zWKbShZC9bTVI7eFQE/xTi5Q9J8=
+github.com/datatrails/go-datatrails-common v0.4.0/go.mod h1:M0Mi6v/2Jgbc5se2zWKbShZC9bTVI7eFQE/xTi5Q9J8=
 github.com/rogpeppe/go-internal v1.6.1 h1:/FiVV8dS/e+YqF2JvO3yXRFbBLTIuSDkuC7aBOAvL+k=
 github.com/rogpeppe/go-internal v1.6.1/go.mod h1:xXDCJY+GAPziupqXw64V24skbSoqbTEfhy4qGm1nDQc=
 github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE=

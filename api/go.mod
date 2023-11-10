@@ -9,7 +9,7 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v0.10.1
 	github.com/google/uuid v1.3.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1
-	github.com/datatrails/go-datarails-common v0.4.0
+	github.com/datatrails/go-datatrails-common v0.9.0
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.12.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20230822172742-b8732ec3820d
