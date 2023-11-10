@@ -1,2 +1,2 @@
-# rkvstcommon-api
-Common public api definitions for the RKVST platform
+# go-datatrails-common-api
+Common public api definitions for the DataTrails platform

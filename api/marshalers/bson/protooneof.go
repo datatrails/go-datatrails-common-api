@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
 	"go.mongodb.org/mongo-driver/bson/bsonrw"
 
-	v2attribute "github.com/rkvst/go-rkvstcommon-api-gen/attribute/v2/attribute"
-	"github.com/rkvst/go-rkvstcommon/logger"
+	v2attribute "github.com/datatrails/go-datatrails-common-api-gen/attribute/v2/attribute"
+	"github.com/datatrails/go-datatrails-common/logger"
 )
 
 // OneofDecoder decodes attribute oneof Attribute

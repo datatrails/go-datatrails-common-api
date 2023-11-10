@@ -3,7 +3,7 @@ package assets
 import (
 	"reflect"
 
-	"github.com/rkvst/go-rkvstcommon-api-gen/marshalers/simpleoneof"
+	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
 )
 
 // NewFlatMarshalerForEvents creates marshaler configured to handle assets/events
