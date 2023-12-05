@@ -41,7 +41,41 @@ vars:
   # imports
   GOPKG_OVERRIDES: ",Mgoogle/protobuf/field_mask.proto=google.golang.org/genproto/protobuf/field_mask"
 
+  # Upstream proto definition files are placed here by the bootstrap tasks
+  PROTO_INC_ROOT: '{{.PROTO_INC_ROOT | default "../proto-include"}}'
+  GOOGLE_COMMON_PROTOS_VERSION: '{{.GOOGLE_COMMON_PROTOS_VERSION | default "1.50.0"}}'
+  GOOGLE_COMMON_INC_ARCHIVE_BASEDIR: '{{.GOOGLE_COMMON_INC_ARCHIVE_BASEDIR | default "api-common-protos"}}'
+  GOOGLE_COMMON_INC_BASEDIR: '{{.GOOGLE_COMMON_INC_BASEDIR | default "api-common-protos-master"}}'
+  GOOGLE_INC:  "{{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}"
+
 tasks:
+
+  bootstrap:
+    desc: |
+      download the third party proto definitions we require and place them at the
+      configured directory
+
+      If you have the correct version of go installed, this is sufficient to
+      enable a host build without recourse to the builder image.
+
+      vars:
+        PROTO_INC_ROOT - downloaded definitions are extracted under here.
+
+    cmds:
+      - task: bootstrap:googleapis
+
+  bootstrap:googleapis:
+    desc: download and prepare the google api proto definitions under PROTO_INC_ROOT
+    cmds:
+      - |
+        curl -fsSOL https://github.com/googleapis/api-common-protos/archive/refs/tags/{{.GOOGLE_COMMON_PROTOS_VERSION}}.tar.gz
+        rm -rf {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}
+        mkdir -p {{.PROTO_INC_ROOT}}
+        tar -C {{.PROTO_INC_ROOT}} -xvzf {{.GOOGLE_COMMON_PROTOS_VERSION}}.tar.gz
+        mv {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_ARCHIVE_BASEDIR}}-{{.GOOGLE_COMMON_PROTOS_VERSION}} \
+          {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}
+        rm -f {{.GOOGLE_COMMON_PROTOS_VERSION}}.tar.gz
+        find {{.GOOGLE_INC}} -type d
 
   generate:
     desc: generate api grpc bindings
@@ -90,12 +124,28 @@ tasks:
       # dummy command, so api gen runs in parallel (deps do this automatically)
       - true
 
+  clean:generated:
+    desc: delete generated proto buf code
+    dir: '../api'
+    cmds:
+      - for ff in $(find . -name "*.pb*.go"); do rm -f $ff; done
+
   preflight:
     summary: run prior to api generation tasks
     dir: '../api'
     cmds:
       - |
         go mod download
+        go get github.com/datatrails/go-datatrails-common-api-gen/tools
+
+        go install \
+          github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
+          github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
+          google.golang.org/protobuf/cmd/protoc-gen-go \
+          google.golang.org/grpc/cmd/protoc-gen-go-grpc \
+          github.com/envoyproxy/protoc-gen-validate \
+          github.com/lyft/protoc-gen-star/v2 \
+          github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc
 
   postflight:
     summary: run after all api generation tasks
@@ -147,11 +197,13 @@ tasks:
          --openapiv2_opt json_names_for_fields=false \
          --openapiv2_opt logtostderr=true \
          --grpc-gateway_out=paths=source_relative,logtostderr=true:. \
-         --plugin /go/bin/protoc-gen-doc \
+         --plugin {{.GOBIN}}/protoc-gen-doc \
          --doc_out={{.API}}/ \
          --doc_opt=confluence_doc.tmpl,confluence.storage \
          {{.API}}/*.proto
     vars:
+      GOBIN:
+        sh: echo ${GOBIN:-$HOME/go/bin}
       # These variables capture the locations that .proto files for third party
       # packages can be found at. The locations can change as a consequence of go
       # mod module updates, so we require a dynamic approach.  The particularly
@@ -171,4 +223,4 @@ tasks:
       PROTOC_INC: "-I {{.ENVOY_VALIDATE}} \
         -I {{.PROTO_GEN_GO_DIR}} \
         -I {{.GRPC_GATEWAY_DIR}} \
-        -I /usr/local/api-common-protos-master/"
+        -I {{.GOOGLE_INC}}"

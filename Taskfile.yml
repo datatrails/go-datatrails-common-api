@@ -68,6 +68,12 @@ tasks:
   # Primary workflow tasks 
   ### -------------------------
 
+  bootstrap:
+    desc: idempotent, run after first clone and after any significant re-base or update
+    cmds:
+      - echo {{.PROTO_INC_ROOT}}
+      # - task apis:fetch-proto-def
+
   # 2. generate
   generate:
     desc: generates all the artifacts we need pre-build
