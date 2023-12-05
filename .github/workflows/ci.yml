@@ -1,0 +1,29 @@
+name: ci
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup go-task
+        run: |
+          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+          echo "${PWD}/bin" >> $GITHUB_PATH
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
+      - name: Setup protobuf
+        uses: arduino/setup-protoc@v2
+        with:
+          version: "24.3"
+      - name: bootstrap
+        run: |
+          task apis:bootsrap
+
+      - name: generate
+        run: |
+          task apis:generate
+     
+
+
