@@ -22,5 +22,21 @@ jobs:
           # Note: it is by design that we don't use the builder
           task apis:bootstrap
           task apis:generate
+          task apis:export
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: go-datatrails-common-api-gen
+          path: exported/datatrails-common-api-gen
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: go-datatrails-common-api-proto
+          # both datatrails-common-api protos & upstream ones under a single
+          # -I dir compatible location
+          path: exported/proto-include
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: go-datatrails-common-api-swagger
+          path: exported/swagger

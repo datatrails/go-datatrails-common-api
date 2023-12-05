@@ -23,12 +23,14 @@ vars:
 
   # DESTDIR
   # The path, relative to the api dir, where the outputs should be rooted.
+  # * The common apis are exported to DESTDIR/api
+  # * The necessary upstream includes are exported to DESTDIR/proto-include
   #
   # When using DESTDIR to create output paths, do NOT insert '/' characters.
   # Please do {{.DESTDIR}}{{.OUTDIR}} rather than {{.DESTDIR}}/{{.OUTDIR}}
   # Note that making DESTDIR=. does not work (cp same file to same file)
-  DESTDIR: '{{.DESTDIR | default "../exported/api/"}}'
-
+  # 
+  DESTDIR: '{{.DESTDIR | default "../exported/"}}'
 
   # see https://github.com/golang/protobuf/issues/143
   # field_mask is a well known type that is recommend for use with UPDATE
@@ -72,8 +74,9 @@ tasks:
         rm -rf {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}
         mkdir -p {{.PROTO_INC_ROOT}}
         tar -C {{.PROTO_INC_ROOT}} -xvzf {{.GOOGLE_COMMON_PROTOS_VERSION}}.tar.gz
-        mv {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_ARCHIVE_BASEDIR}}-{{.GOOGLE_COMMON_PROTOS_VERSION}} \
-          {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}
+        mkdir -p {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}
+        mv {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_ARCHIVE_BASEDIR}}-{{.GOOGLE_COMMON_PROTOS_VERSION}}/google \
+          {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}/
         rm -f {{.GOOGLE_COMMON_PROTOS_VERSION}}.tar.gz
         find {{.GOOGLE_INC}} -type d
 
@@ -98,17 +101,29 @@ tasks:
         attribute/v2/attribute
         caps/v1/caps
         filter/v1/filter
+      # The defaults match the expectations of .github/workflows/ci.yml
+      COMMON_GODIR: datatrails-common-api-gen
+      COMMON_PROTODIR: datatrails-common-api
     cmds:
       - |
-        mkdir -p {{.DESTDIR}}
+        mkdir -p {{.DESTDIR}}{{.COMMON_GODIR}}
         for name in {{.SOURCES}}; do
-          cp -vr ${name} {{.DESTDIR}}
+          cp -vr ${name} {{.DESTDIR}}{{.COMMON_GODIR}}/
         done
+
+        mkdir -p {{.DESTDIR}}/proto-include/{{.COMMON_PROTODIR}}
+        mkdir -p {{.DESTDIR}}/swagger
+
+        # The source protos are all gathered under a 'google' common top dir
+        cp -vr {{.GOOGLE_INC}}/* {{.DESTDIR}}proto-include/
+
         for api in {{.APIS}}; do
-          mkdir -vp {{.DESTDIR}}${api}
-          cp -vr ${api}/*.go {{.DESTDIR}}${api}/
-          cp -vr ${api}/*.swagger.json {{.DESTDIR}}${api}/
-          cp -vr ${api}/*.proto {{.DESTDIR}}${api}/
+          mkdir -vp {{.DESTDIR}}{{.COMMON_GODIR}}/${api}
+          cp -vr ${api}/*.go {{.DESTDIR}}{{.COMMON_GODIR}}/${api}
+          mkdir -vp {{.DESTDIR}}swagger/${api}
+          cp -vr ${api}/*.swagger.json {{.DESTDIR}}swagger/${api}
+          mkdir -vp {{.DESTDIR}}proto-include/{{.COMMON_PROTODIR}}/${api}
+          cp -vr ${api}/*.proto {{.DESTDIR}}proto-include/{{.COMMON_PROTODIR}}/${api}
         done
 
 
