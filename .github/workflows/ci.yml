@@ -17,13 +17,10 @@ jobs:
         uses: arduino/setup-protoc@v2
         with:
           version: "24.3"
-      - name: bootstrap
+      - name: all ci steps
         run: |
-          task apis:bootsrap
-
-      - name: generate
-        run: |
+          # Note: it is by design that we don't use the builder
+          task apis:bootstrap
           task apis:generate
-     
 
 

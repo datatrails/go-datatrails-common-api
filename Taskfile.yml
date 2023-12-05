@@ -67,12 +67,14 @@ tasks:
   ### -------------------------
   # Primary workflow tasks 
   ### -------------------------
-
-  bootstrap:
-    desc: idempotent, run after first clone and after any significant re-base or update
+  all:
+    desc: "do everything necessary after clone (or rebase)"
     cmds:
-      - echo {{.PROTO_INC_ROOT}}
-      # - task apis:fetch-proto-def
+      - task: builder-start
+      - defer: {task: builder-cleanup}
+      # These steps should exactly mirror the steps in .github/workflows/ci.yml
+      - docker exec -t {{.BUILD_CONTAINER}} task apis:bootstrap
+      - docker exec -t {{.BUILD_CONTAINER}} task apis:generate
 
   # 2. generate
   generate:
@@ -80,4 +82,5 @@ tasks:
     cmds:
       - task: builder-start
       - defer: {task: builder-cleanup}
+      # DO NOT add bootstrap here, use all instead
       - docker exec -t {{.BUILD_CONTAINER}} task apis:generate
