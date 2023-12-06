@@ -35,16 +35,15 @@ jobs:
           # -I dir compatible location
           path: exported/proto-include
 
-      # disabled until protos work
-      #- uses: actions/upload-artifact@v3
-      #  with:
-      #    name: go-datatrails-common-api-swagger
-      #    path: exported/swagger
+      - uses: actions/upload-artifact@v3
+        with:
+          name: go-datatrails-common-api-swagger
+          path: exported/swagger
 
-      #- uses: actions/upload-artifact@v3
-      #  with:
-      #    name: go-datatrails-common-api-gen
-      #    path: exported/datatrails-common-api-gen
+      - uses: actions/upload-artifact@v3
+        with:
+          name: go-datatrails-common-api-gen
+          path: exported/datatrails-common-api-gen
 
 
   release:
@@ -57,8 +56,19 @@ jobs:
         with:
           name: go-datatrails-common-api-proto
           path: exported/proto-include
-      - name: show files
-        working-directory: exported/proto-include
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: go-datatrails-common-api-swagger
+          path: exported/swagger
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: datatrails-common-api-gen
+          path: exported/datatrails-common-api-gen
+
+      - name: show directories
+        working-directory: exported/
         run: find . -type d
       - name: Upload proto files 
         env:
@@ -66,34 +76,20 @@ jobs:
         working-directory: exported
         run: |
           TAG="$(echo "${GITHUB_REF}" | grep tags | grep -o "[^/]*$" || true)"
+
+          # this test will fail if the event type is not 'published'
           if [ -z "$TAG" ]; then
             echo "::error ::This is not a tagged release"
             exit 1
           fi
 
-          mv proto-include go-datatrails-common-api-proto
-          tar -czf go-datatrails-common-api-proto.tar.gz go-datatrails-common-api-proto
-
+          mv proto-include go-datatrails-common-api-proto-include
+          tar -czf go-datatrails-common-api-proto-include.tar.gz go-datatrails-common-api-proto-include
           gh release upload $TAG go-datatrails-common-api-proto.tar.gz
 
-          # AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
-          # RELEASE_ID=$TAG
+          mv swagger go-datatrails-common-api-swagger
+          tar -czf go-datatrails-common-api-swagger.tar.gz go-datatrails-common-api-swagger
+          gh release upload $TAG go-datatrails-common-api-swagger.tar.gz
 
-          # echo "Verifying release"
-          # HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
-          #   -sSL \
-          #   -H "${AUTH_HEADER}" \
-          #   "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_ID}")
-
-          # HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-
-          # if [[ "$HTTP_STATUS" -ne 200 ]]; then
-          #   echo "::error ::Release is missing"
-          #   exit 1
-          # fi
-          # path=proto-include
-
-          # if [[ ! -d $path ]]; then exit 1; fi
-
-          # ghr -u "${GITHUB_REPOSITORY%/*}" -r "${GITHUB_REPOSITORY#*/}" "${GITHUB_REF#refs/tags/}" "${path}"
-          # echo "::debug ::Uploaded $path"
+          tar -czf go-datatrails-common-api-gen.tar.gz go-datatrails-common-api-gen
+          gh release upload $TAG go-datatrails-common-api-gen.tar.gz
