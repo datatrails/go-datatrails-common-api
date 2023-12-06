@@ -1,5 +1,9 @@
 name: ci
-on: [release]
+on:
+  push:
+  release:
+    types: [published]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -54,17 +58,23 @@ jobs:
           path: exported/proto-include
       - name: show files
         working-directory: exported/proto-include
-        run: ls -R
+        run: find . -type d
       - name: Upload proto files 
         working-directory: exported
         run: |
           TAG="$(echo "${GITHUB_REF}" | grep tags | grep -o "[^/]*$" || true)"
           if [ -z "$TAG" ]; then
-            echo "::error ::This is not a tagged push"
+            echo "::error ::This is not a tagged release"
             exit 1
           fi
-          AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
-          RELEASE_ID=$TAG
+
+          mv proto-include go-datatrails-common-api-proto
+          tar -czf go-datatrails-common-api-proto.tar.gz go-datatrails-common-api-proto
+
+          gh release upload $TAG go-datatrails-common-api-proto.tar.gz
+
+          # AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
+          # RELEASE_ID=$TAG
 
           # echo "Verifying release"
           # HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
@@ -78,9 +88,9 @@ jobs:
           #   echo "::error ::Release is missing"
           #   exit 1
           # fi
-          path=proto-include
+          # path=proto-include
 
-          if [[ ! -d $path ]]; then exit 1; fi
+          # if [[ ! -d $path ]]; then exit 1; fi
 
-          ghr -u "${GITHUB_REPOSITORY%/*}" -r "${GITHUB_REPOSITORY#*/}" "${GITHUB_REF#refs/tags/}" "${path}"
-          echo "::debug ::Uploaded $path"
+          # ghr -u "${GITHUB_REPOSITORY%/*}" -r "${GITHUB_REPOSITORY#*/}" "${GITHUB_REF#refs/tags/}" "${path}"
+          # echo "::debug ::Uploaded $path"
