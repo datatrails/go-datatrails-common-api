@@ -5,7 +5,8 @@ on:
     types: [published]
 
 jobs:
-  build:
+  build_and_release:
+    name: Build and Release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,14 +22,14 @@ jobs:
         uses: arduino/setup-protoc@v2
         with:
           version: "24.3"
-      - name: all ci steps
+      - name: Generate and export
         run: |
           # Note: it is by design that we don't use the builder
           task apis:bootstrap
           task apis:generate
           task apis:export
 
-      - name: show directories
+      - name: Show exports
         working-directory: exported/
         run: find . -type d
 
@@ -54,67 +55,3 @@ jobs:
 
           tar -czf go-datatrails-common-api-gen.tar.gz go-datatrails-common-api-gen
           gh release upload $TAG go-datatrails-common-api-gen.tar.gz
-
-      # - uses: actions/upload-artifact@v3
-      #   with:
-      #     name: proto-include 
-      #     # both datatrails-common-api protos & upstream ones under a single
-      #     # -I dir compatible location
-      #     path: exported/proto-include
-
-      # - uses: actions/upload-artifact@v3
-      #   with:
-      #     name: swagger
-      #     path: exported/swagger
-
-      # - uses: actions/upload-artifact@v3
-      #   with:
-      #     name: go-datatrails-common-api-gen
-      #     path: exported/go-datatrails-common-api-gen
-
-
- #release:
- #  runs-on: ubuntu-latest
- #  if: ${{ github.event_name == 'release' }}
- #  needs: build
- #  steps:
- #    - uses: actions/checkout@v4
- #    - uses: actions/download-artifact@v3
- #      with:
- #        name: proto-include
- #        path: exported/proto-include
-
- #    - uses: actions/download-artifact@v3
- #      with:
- #        name: swagger
- #        path: exported/swagger
-
- #    - uses: actions/download-artifact@v3
- #      with:
- #        name: go-datatrails-common-api-gen
- #        path: exported/go-datatrails-common-api-gen
-
- #    - name: show directories
- #      working-directory: exported/
- #      run: find . -type d
- #    - name: Upload proto files 
- #      env:
- #        GH_TOKEN: ${{ github.token }}
- #      working-directory: exported
- #      run: |
- #        TAG="$(echo "${GITHUB_REF}" | grep tags | grep -o "[^/]*$" || true)"
-
- #        # this test will fail if the event type is not 'published'
- #        if [ -z "$TAG" ]; then
- #          echo "::error ::This is not a tagged release"
- #          exit 1
- #        fi
-
- #        tar -czf proto-include.tar.gz proto-include
- #        gh release upload $TAG proto-include.tar.gz
-
- #        tar -czf swagger.tar.gz swagger
- #        gh release upload $TAG swagger.tar.gz
-
- #        tar -czf go-datatrails-common-api-gen.tar.gz go-datatrails-common-api-gen
- #        gh release upload $TAG go-datatrails-common-api-gen.tar.gz
