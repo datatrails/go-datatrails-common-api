@@ -1,5 +1,5 @@
 name: ci
-on: [push]
+on: [push, release]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,3 +40,16 @@ jobs:
         with:
           name: go-datatrails-common-api-swagger
           path: exported/swagger
+
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' }}
+    needs: build
+    steps:
+      - uses: actions/download-artefiact@v3
+        with:
+          name: go-datatrails-common-api-proto
+          path: exported/proto-include
+      - name: show files
+        working-directory: exported/proto-include
+        run: ls -R
