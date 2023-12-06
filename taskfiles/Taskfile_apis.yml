@@ -102,7 +102,7 @@ tasks:
         caps/v1/caps
         filter/v1/filter
       # The defaults match the expectations of .github/workflows/ci.yml
-      COMMON_GODIR: datatrails-common-api-gen
+      COMMON_GODIR: go-datatrails-common-api-gen
       COMMON_PROTODIR: datatrails-common-api
     cmds:
       - |
