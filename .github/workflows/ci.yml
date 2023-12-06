@@ -46,7 +46,7 @@ jobs:
     if: ${{ github.event_name == 'release' }}
     needs: build
     steps:
-      - uses: actions/download-artefiact@v3
+      - uses: actions/download-artifact@v3
         with:
           name: go-datatrails-common-api-proto
           path: exported/proto-include
