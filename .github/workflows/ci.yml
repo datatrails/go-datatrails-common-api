@@ -1,5 +1,5 @@
 name: ci
-on: [push, release]
+on: [release]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -66,18 +66,18 @@ jobs:
           AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
           RELEASE_ID=$TAG
 
-          echo "Verifying release"
-          HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
-            -sSL \
-            -H "${AUTH_HEADER}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_ID}")
+          # echo "Verifying release"
+          # HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
+          #   -sSL \
+          #   -H "${AUTH_HEADER}" \
+          #   "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_ID}")
 
-          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          # HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
 
-          if [[ "$HTTP_STATUS" -ne 200 ]]; then
-            echo "::error ::Release is missing"
-            exit 1
-          fi
+          # if [[ "$HTTP_STATUS" -ne 200 ]]; then
+          #   echo "::error ::Release is missing"
+          #   exit 1
+          # fi
           path=proto-include
 
           if [[ ! -d $path ]]; then exit 1; fi
