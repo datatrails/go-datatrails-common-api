@@ -26,20 +26,22 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: go-datatrails-common-api-gen
-          path: exported/datatrails-common-api-gen
-
-      - uses: actions/upload-artifact@v3
-        with:
           name: go-datatrails-common-api-proto
           # both datatrails-common-api protos & upstream ones under a single
           # -I dir compatible location
           path: exported/proto-include
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: go-datatrails-common-api-swagger
-          path: exported/swagger
+      # disabled until protos work
+      #- uses: actions/upload-artifact@v3
+      #  with:
+      #    name: go-datatrails-common-api-swagger
+      #    path: exported/swagger
+
+      #- uses: actions/upload-artifact@v3
+      #  with:
+      #    name: go-datatrails-common-api-gen
+      #    path: exported/datatrails-common-api-gen
+
 
   release:
     runs-on: ubuntu-latest
@@ -53,3 +55,32 @@ jobs:
       - name: show files
         working-directory: exported/proto-include
         run: ls -R
+      - name: Upload proto files 
+        working-directory: exported
+        run: |
+          TAG="$(echo "${GITHUB_REF}" | grep tags | grep -o "[^/]*$" || true)"
+          if [ -z "$TAG" ]; then
+            echo "::error ::This is not a tagged push"
+            exit 1
+          fi
+          AUTH_HEADER="Authorization: token ${GITHUB_TOKEN}"
+          RELEASE_ID=$TAG
+
+          echo "Verifying release"
+          HTTP_RESPONSE=$(curl --write-out "HTTPSTATUS:%{http_code}" \
+            -sSL \
+            -H "${AUTH_HEADER}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_ID}")
+
+          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+
+          if [[ "$HTTP_STATUS" -ne 200 ]]; then
+            echo "::error ::Release is missing"
+            exit 1
+          fi
+          path=proto-include
+
+          if [[ ! -d $path ]]; then exit 1; fi
+
+          ghr -u "${GITHUB_REPOSITORY%/*}" -r "${GITHUB_REPOSITORY#*/}" "${GITHUB_REF#refs/tags/}" "${path}"
+          echo "::debug ::Uploaded $path"
