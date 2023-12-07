@@ -10,8 +10,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	// v2attribute "github.com/datatrails/go-datatrails-common-api-gen/attribute/v2/attribute"
-	// v2filter "github.com/datatrails/go-datatrails-common-api-gen/filter/v2/filter"
 )
 
 func TestFilterParsing(t *testing.T) {

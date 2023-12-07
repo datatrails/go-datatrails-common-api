@@ -8,10 +8,10 @@ import "validate/validate.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
-import "assets/v2/assets/enums.proto";
-import "assets/v2/assets/principal.proto";
-import "filter/v1/filter/filter.proto";
-import "assets/v2/assets/eventresponse.proto";
+import "datatrails-common-api/assets/v2/assets/enums.proto";
+import "datatrails-common-api/assets/v2/assets/principal.proto";
+import "datatrails-common-api/filter/v1/filter/filter.proto";
+import "datatrails-common-api/assets/v2/assets/eventresponse.proto";
 
 message ListEventsRequest {
 

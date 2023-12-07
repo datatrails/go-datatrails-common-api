@@ -22,4 +22,3 @@ message GetEventRequest {
         (validate.rules).string.uuid = true
     ];
 }
-

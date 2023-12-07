@@ -16,21 +16,11 @@ enum TrackedStatus {
     ANY = 3;
 }
 
-/* Specifies how the asset data will be stored. This is set once on creation
- * and does not change.*/
-enum StorageIntegrity {
-    STORAGE_INTEGRITY_UNSPECIFIED = 0;
-    LEDGER = 1;
-    TENANT_STORAGE = 2;
-}
-
 enum ProofMechanism {
     PROOF_MECHANISM_UNSPECIFIED = 0;
-    KHIPU = 1;
+    RESERVED1 = 1;
     SIMPLE_HASH = 2;
-    TRIE_HASH = 3;
-    TRIE_HASH_MERKLE = 4;
-    TRIE_HASH_VERKLE = 5;
+    MERKLE_LOG = 3;
 }
 
 enum Privacy {

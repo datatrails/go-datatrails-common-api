@@ -8,16 +8,16 @@ import "google/api/annotations.proto";
 import "validate/validate.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
-import "assets/v2/assets/assetresponse.proto";
-import "assets/v2/assets/createasset.proto";
-import "assets/v2/assets/createevent.proto";
-import "assets/v2/assets/eventresponse.proto";
-import "assets/v2/assets/getasset.proto";
-import "assets/v2/assets/getevent.proto";
-import "assets/v2/assets/listassets.proto";
-import "assets/v2/assets/listevents.proto";
-import "assets/v2/assets/miscmessages.proto";
-import "caps/v1/caps/caps.proto";
+import "datatrails-common-api/assets/v2/assets/assetresponse.proto";
+import "datatrails-common-api/assets/v2/assets/createasset.proto";
+import "datatrails-common-api/assets/v2/assets/createevent.proto";
+import "datatrails-common-api/assets/v2/assets/eventresponse.proto";
+import "datatrails-common-api/assets/v2/assets/getasset.proto";
+import "datatrails-common-api/assets/v2/assets/getevent.proto";
+import "datatrails-common-api/assets/v2/assets/listassets.proto";
+import "datatrails-common-api/assets/v2/assets/listevents.proto";
+import "datatrails-common-api/assets/v2/assets/miscmessages.proto";
+import "datatrails-common-api/caps/v1/caps/caps.proto";
 
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     info: {

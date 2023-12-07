@@ -1,5 +1,4 @@
-// Maintainers, please refer to the style guide here:
-//     https://developers.google.com/protocol-buffers/docs/style
+
 syntax = "proto3";
 //
 // Structured filter for internal list of OR'd condition

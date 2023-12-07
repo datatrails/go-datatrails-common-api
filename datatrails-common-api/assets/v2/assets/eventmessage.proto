@@ -4,8 +4,8 @@ syntax = "proto3";
 package archivist.v2;
 option go_package="github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets;assets";
 
-import "assets/v2/assets/eventresponse.proto";
-import "assets/v2/assets/assetresponse.proto";
+import "datatrails-common-api/assets/v2/assets/eventresponse.proto";
+import "datatrails-common-api/assets/v2/assets/assetresponse.proto";
 
 // This internal message is used extensively to pass events through the system
 // message buses, both incoming to the DLT and outgoing from the DLT

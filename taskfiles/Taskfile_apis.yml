@@ -44,53 +44,102 @@ vars:
   GOPKG_OVERRIDES: ",Mgoogle/protobuf/field_mask.proto=google.golang.org/genproto/protobuf/field_mask"
 
   # Upstream proto definition files are placed here by the bootstrap tasks
-  PROTO_INC_ROOT: '{{.PROTO_INC_ROOT | default "../proto-include"}}'
   GOOGLE_COMMON_PROTOS_VERSION: '{{.GOOGLE_COMMON_PROTOS_VERSION | default "1.50.0"}}'
   GOOGLE_COMMON_INC_ARCHIVE_BASEDIR: '{{.GOOGLE_COMMON_INC_ARCHIVE_BASEDIR | default "api-common-protos"}}'
-  GOOGLE_COMMON_INC_BASEDIR: '{{.GOOGLE_COMMON_INC_BASEDIR | default "api-common-protos-master"}}'
-  GOOGLE_INC:  "{{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}"
 
 tasks:
 
   bootstrap:
     desc: |
-      download the third party proto definitions we require and place them at the
-      configured directory
+      download the third party proto definitions we require under proto-include
 
       If you have the correct version of go installed, this is sufficient to
       enable a host build without recourse to the builder image.
 
-      vars:
-        PROTO_INC_ROOT - downloaded definitions are extracted under here.
-
     cmds:
       - task: bootstrap:googleapis
+      - task: bootstrap:grpc_health
 
   bootstrap:googleapis:
-    desc: download and prepare the google api proto definitions under PROTO_INC_ROOT
+    desc: download and prepare the google api proto definitions under proto-include
+    dir: '..'
     cmds:
       - |
+        rm -rf proto-include/google
+        mkdir -p proto-include
+
         curl -fsSOL https://github.com/googleapis/api-common-protos/archive/refs/tags/{{.GOOGLE_COMMON_PROTOS_VERSION}}.tar.gz
-        rm -rf {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}
-        mkdir -p {{.PROTO_INC_ROOT}}
-        tar -C {{.PROTO_INC_ROOT}} -xvzf {{.GOOGLE_COMMON_PROTOS_VERSION}}.tar.gz
-        mkdir -p {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}
-        mv {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_ARCHIVE_BASEDIR}}-{{.GOOGLE_COMMON_PROTOS_VERSION}}/google \
-          {{.PROTO_INC_ROOT}}/{{.GOOGLE_COMMON_INC_BASEDIR}}/
+        tar -xvzf {{.GOOGLE_COMMON_PROTOS_VERSION}}.tar.gz
+        mv {{.GOOGLE_COMMON_INC_ARCHIVE_BASEDIR}}-{{.GOOGLE_COMMON_PROTOS_VERSION}}/google \
+          proto-include/
         rm -f {{.GOOGLE_COMMON_PROTOS_VERSION}}.tar.gz
-        find {{.GOOGLE_INC}} -type d
+        rm -rf {{.GOOGLE_COMMON_INC_ARCHIVE_BASEDIR}}-{{.GOOGLE_COMMON_PROTOS_VERSION}}
+        find proto-include -type d
+
+
+  bootstrap:grpc_health:
+    desc: download and prepare the grpc health definitions we require under proto-include
+    dir: '..'
+    cmds:
+      - |
+        rm -rf proto-include/grpc/health/v1
+        mkdir -p proto-include/grpc/health/v1
+        curl -fsSOL https://raw.githubusercontent.com/grpc/grpc-proto/master/grpc/health/v1/health.proto
+        mv health.proto proto-include/grpc/health/v1/
+        ls -la proto-include/grpc/health/v1/
+
+  clean:generated:
+    desc: delete generated proto buf code
+    dir: '../datatrails-common-api'
+    cmds:
+      - for ff in $(find . -name "*.pb*.go"); do rm -f $ff; done
+      - for ff in $(find . -name "*.swagger.json"); do rm -f $ff; done
+
+  preflight:
+    summary: run prior to api generation tasks
+    dir: '../datatrails-common-api'
+    cmds:
+      - |
+        go mod download
+        go get github.com/datatrails/go-datatrails-common-api-gen/tools
+
+        go install \
+          github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
+          github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
+          google.golang.org/protobuf/cmd/protoc-gen-go \
+          google.golang.org/grpc/cmd/protoc-gen-go-grpc \
+          github.com/envoyproxy/protoc-gen-validate \
+          github.com/lyft/protoc-gen-star/v2 \
+          github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc
+
+  postflight:
+    summary: run after all api generation tasks
+    dir: '../datatrails-common-api'
+    cmds:
+      - go mod tidy
+      - task: build
+
 
   generate:
     desc: generate api grpc bindings
-    dir: '../api'
+    dir: '../datatrails-common-api'
     cmds:
       - task: preflight
-      - task: all-api
+      - task: all-apis
       - task: postflight
+
+  build:
+    summary: run after all api generation tasks
+    dir: '../datatrails-common-api'
+    cmds:
+      - |
+        go build ./...
+        go test ./...
+
 
   export:
     desc: export the sources to the desired DESTDIR
-    dir: '../api'
+    dir: '../datatrails-common-api'
     vars:
       SOURCES: >-
         marshalers
@@ -115,7 +164,7 @@ tasks:
         mkdir -p {{.DESTDIR}}/swagger
 
         # The source protos are all gathered under a 'google' common top dir
-        cp -vr {{.GOOGLE_INC}}/* {{.DESTDIR}}proto-include/
+        cp -vr ../proto-include/google {{.DESTDIR}}proto-include/
 
         for api in {{.APIS}}; do
           mkdir -vp {{.DESTDIR}}{{.COMMON_GODIR}}/${api}
@@ -127,9 +176,9 @@ tasks:
         done
 
 
-  all-api:
+  all-apis:
     summary: generate code for all interfaces and copy related sources
-    dir: '../api'
+    dir: '../datatrails-common-api'
     deps:
       - task: assetsv2-api
       - task: attributev2-api
@@ -138,36 +187,6 @@ tasks:
     cmds:
       # dummy command, so api gen runs in parallel (deps do this automatically)
       - true
-
-  clean:generated:
-    desc: delete generated proto buf code
-    dir: '../api'
-    cmds:
-      - for ff in $(find . -name "*.pb*.go"); do rm -f $ff; done
-
-  preflight:
-    summary: run prior to api generation tasks
-    dir: '../api'
-    cmds:
-      - |
-        go mod download
-        go get github.com/datatrails/go-datatrails-common-api-gen/tools
-
-        go install \
-          github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
-          github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
-          google.golang.org/protobuf/cmd/protoc-gen-go \
-          google.golang.org/grpc/cmd/protoc-gen-go-grpc \
-          github.com/envoyproxy/protoc-gen-validate \
-          github.com/lyft/protoc-gen-star/v2 \
-          github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc
-
-  postflight:
-    summary: run after all api generation tasks
-    dir: '../api'
-    cmds:
-      - |
-        go mod tidy
 
   assetsv2-api:
     summary: Generate the assetsv2 api
@@ -194,7 +213,7 @@ tasks:
 
   any-api:
     # dev-notes/build-warts.md#always-set-dir-relative-to-current-task-file
-    dir: '../api'
+    dir: '..'
     # summary: Generate the service grpc stubs, rest http proxy and swagger json for any api
     #
     cmds:
@@ -203,20 +222,23 @@ tasks:
       # Generates the swagger definitions for the gRPC service.
       # Generates the html docs for the gRPC service.
       - |
-        protoc -I . {{.PROTOC_INC}} \
-         --go_out=paths=source_relative:. \
-         --go-grpc_out=paths=source_relative:. \
-         --validate_out=lang=go,paths=source_relative:. \
-         --openapiv2_out=. \
+        protoc -I {{.SELF_INC}} {{.PROTOC_INC}} \
+         --go_out=paths=source_relative:{{.OUTPATH}} \
+         --go-grpc_out=paths=source_relative:{{.OUTPATH}} \
+         --validate_out=lang=go,paths=source_relative:{{.OUTPATH}} \
+         --openapiv2_out={{.OUTPATH}} \
          --openapiv2_opt disable_default_errors=true \
          --openapiv2_opt json_names_for_fields=false \
          --openapiv2_opt logtostderr=true \
-         --grpc-gateway_out=paths=source_relative,logtostderr=true:. \
+         --grpc-gateway_out=paths=source_relative,logtostderr=true:{{.OUTPATH}} \
          --plugin {{.GOBIN}}/protoc-gen-doc \
-         --doc_out={{.API}}/ \
-         --doc_opt=confluence_doc.tmpl,confluence.storage \
-         {{.API}}/*.proto
+         --doc_out={{.SRCPATH}}{{.API}}/ \
+         --doc_opt={{.SRCPATH}}confluence_doc.tmpl,{{.SRCPATH}}confluence.storage \
+         {{.SRCPATH}}{{.API}}/*.proto
     vars:
+      SRCPATH: datatrails-common-api/
+      # OUTPATH: datatrails-common-api
+      OUTPATH: . 
       GOBIN:
         sh: echo ${GOBIN:-$HOME/go/bin}
       # These variables capture the locations that .proto files for third party
@@ -226,16 +248,30 @@ tasks:
       # command. To do so we have to prevent go template from evaluating it.
       #
       PROTO_GEN_GO_DIR:
-        # NOTICE: You need to set GOCACHE for any go commands
-        sh: echo $(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} google.golang.org/protobuf/cmd/protoc-gen-go )
+        # Notice; the tricksy 'cd datatrails-common-api' rather than just
+        # running in that directory via tasks 'dir:' directive is so that we can
+        # have the same import statements in the proto files *everywhere*. All
+        # consumers of datatrails-common-api get to do things very simply in
+        # return for this. AND it makes iteratively generating proto changes
+        # across repositories a lot more efficient
+        sh: |
+          cd datatrails-common-api
+          echo $(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} google.golang.org/protobuf/cmd/protoc-gen-go)
+
       GRPC_GATEWAY_DIR:
-        sh: echo $(dirname $(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/grpc-ecosystem/grpc-gateway/v2/runtime))
+        sh: |
+          cd datatrails-common-api
+          echo $(dirname $(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/grpc-ecosystem/grpc-gateway/v2/runtime))
       ENVOY_VALIDATE:
-        sh: echo $(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/envoyproxy/protoc-gen-validate)
+        sh: |
+          cd datatrails-common-api
+          echo $(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/envoyproxy/protoc-gen-validate)
+      
+      SELF_INC: .
 
       # Global includes used for all protoc invocations.
       # task sets cwd initially to the directory of the Taskfile.yml
       PROTOC_INC: "-I {{.ENVOY_VALIDATE}} \
         -I {{.PROTO_GEN_GO_DIR}} \
         -I {{.GRPC_GATEWAY_DIR}} \
-        -I {{.GOOGLE_INC}}"
+        -I proto-include"

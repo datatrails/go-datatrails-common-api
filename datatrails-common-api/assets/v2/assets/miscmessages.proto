@@ -6,7 +6,7 @@ option go_package="github.com/datatrails/go-datatrails-common-api-gen/assets/v2/
 
 import "protoc-gen-openapiv2/options/annotations.proto";
 
-import "assets/v2/assets/eventmessage.proto";
+import "datatrails-common-api/assets/v2/assets/eventmessage.proto";
 
 // These internal messages are used for the incoming event message path which is
 // done in three stages, khipu assembly, event commit and commit receipt

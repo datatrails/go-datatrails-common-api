@@ -7,12 +7,14 @@ option go_package="github.com/datatrails/go-datatrails-common-api-gen/assets/v2/
 import "validate/validate.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
-import "filter/v1/filter/filter.proto";
-import "assets/v2/assets/enums.proto";
-import "assets/v2/assets/assetresponse.proto";
-
+import "datatrails-common-api/filter/v1/filter/filter.proto";
+import "datatrails-common-api/assets/v2/assets/enums.proto";
+import "datatrails-common-api/assets/v2/assets/assetresponse.proto";
 
 message ListAssetsRequest {
+    reserved "storage_integrity";
+    reserved 7; // was storage_integrity
+
     // Maximum results per page.
     int32 page_size = 1 [(validate.rules).int32.gte = 0];
 
@@ -48,11 +50,6 @@ message ListAssetsRequest {
         }
     ];
 
-    // XXX: #4483 DEPRECATED use proof_mechanism
-    StorageIntegrity storage_integrity = 7 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-        description: "DEPRECATED use proof_mechanism"
-        }
-    ];
     // proof mechanism of the asset (and all its events)
     ProofMechanism proof_mechanism = 8 [
         (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {

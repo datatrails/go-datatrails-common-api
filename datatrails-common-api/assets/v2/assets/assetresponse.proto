@@ -7,16 +7,19 @@ option go_package="github.com/datatrails/go-datatrails-common-api-gen/assets/v2/
 import "protoc-gen-openapiv2/options/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
-import "assets/v2/assets/enums.proto";
-import "attribute/v2/attribute/attribute.proto";
+import "datatrails-common-api/assets/v2/assets/enums.proto";
+import "datatrails-common-api/attribute/v2/attribute/attribute.proto";
 
 /* The full set of properties common to all assets. Note that some of these properies are synthesized by the system. Individual apis will clarify which properties the accept and require. Assets may have one or more representative images. Those will be included in the attachments list. The label for those attachements is up to the UI
  * Note that there is no PATCH or PUT for assets as they are immutable and "changes" are merely aggregated events on the identified asset, therefore mutable fields; display_name, extended_attributes, type_attributes, tracked and attachments, will each require an Event to change (see Events below).
  */
 message AssetResponse {
+    reserved "storage_integrity";
+    reserved 9; // Was storage_integrity
+
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
         json_schema: {
-            description: "This describes DataTrails Asset."
+            description: "This describes an Asset."
         }
         example:"{ "
             "\"identity\": \"assets/add30235-1424-4fda-840a-d5ef82c4c96f\", "
@@ -92,16 +95,6 @@ message AssetResponse {
         description: "indicates time the asset data is from"
         read_only: true
     }];
-
-    // XXX: #4483 DEPRECATED use proof_mechanism
-    StorageIntegrity storage_integrity = 9 [
-        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-            description: "DEPRECATED use proof_mechanism"
-            // see https://github.com/grpc-ecosystem/grpc-gateway/blob/master/protoc-gen-openapiv2/options/openapiv2.proto
-            //  for specific types.
-            type: STRING
-        }
-    ];
 
     ProofMechanism proof_mechanism = 10 [
         (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
