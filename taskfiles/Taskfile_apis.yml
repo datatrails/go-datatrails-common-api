@@ -143,6 +143,7 @@ tasks:
     vars:
       SOURCES: >-
         marshalers
+        tools
         go.mod
         go.sum
       APIS: >-
