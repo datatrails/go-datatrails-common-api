@@ -5,6 +5,9 @@ module github.com/datatrails/go-datatrails-common-api-gen
 
 go 1.21
 
+// This allows this module to operate as tho it were the generated module. This
+// allows us to manage the proto tool dependencies via this go.mod. This go.mod
+// is also used as the go.mod for the generated package.
 replace github.com/datatrails/go-datatrails-common-api-gen => ./
 
 require (

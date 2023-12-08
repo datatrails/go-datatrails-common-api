@@ -128,7 +128,7 @@ tasks:
       - task: all-apis
       - task: postflight
 
-  build:
+  test:
     summary: run after all api generation tasks
     dir: '../datatrails-common-api'
     cmds:
@@ -165,7 +165,7 @@ tasks:
         mkdir -p {{.DESTDIR}}/swagger
 
         # The source protos are all gathered under a 'google' common top dir
-        cp -vr ../proto-include/google {{.DESTDIR}}proto-include/
+        cp -vr ../proto-include/* {{.DESTDIR}}proto-include/
 
         for api in {{.APIS}}; do
           mkdir -vp {{.DESTDIR}}{{.COMMON_GODIR}}/${api}

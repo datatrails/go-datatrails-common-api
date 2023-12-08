@@ -22,11 +22,13 @@ jobs:
         uses: arduino/setup-protoc@v2
         with:
           version: "24.3"
-      - name: Generate and export
+
+      - name: Generate, Test and Export
         run: |
           # Note: it is by design that we don't use the builder
           task apis:bootstrap
           task apis:generate
+          task apis:test
           task apis:export
 
       - name: Show exports
@@ -46,6 +48,8 @@ jobs:
             echo "::error ::This is not a tagged release"
             exit 1
           fi
+
+          find . -type d
 
           tar -czf proto-include.tar.gz proto-include
           gh release upload $TAG proto-include.tar.gz

@@ -75,6 +75,8 @@ tasks:
       # These steps should exactly mirror the steps in .github/workflows/ci.yml
       - docker exec -t {{.BUILD_CONTAINER}} task apis:bootstrap
       - docker exec -t {{.BUILD_CONTAINER}} task apis:generate
+      - docker exec -t {{.BUILD_CONTAINER}} task apis:test
+      - docker exec -t {{.BUILD_CONTAINER}} task apis:export
 
   # 2. generate
   generate:
