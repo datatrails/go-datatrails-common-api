@@ -117,8 +117,6 @@ tasks:
     dir: '../datatrails-common-api'
     cmds:
       - go mod tidy
-      - task: build
-
 
   generate:
     desc: generate api grpc bindings
@@ -175,7 +173,6 @@ tasks:
           mkdir -vp {{.DESTDIR}}proto-include/{{.COMMON_PROTODIR}}/${api}
           cp -vr ${api}/*.proto {{.DESTDIR}}proto-include/{{.COMMON_PROTODIR}}/${api}
         done
-
 
   all-apis:
     summary: generate code for all interfaces and copy related sources
