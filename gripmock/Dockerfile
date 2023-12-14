@@ -2,7 +2,7 @@
 # https://docs.docker.com/engine/reference/commandline/image_tag/
 ARG BASE_TAG=latest
 
-FROM tkpd/gripmock:v1.12.1
+FROM bavix/gripmock:2.4.0
 
 # NOTE: the protoc stuff is copied from the builder image repo.
 
@@ -53,7 +53,8 @@ RUN go install github.com/envoyproxy/protoc-gen-validate@${PROTOC_GEN_VALIDATE_V
   && go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@${PROTOC_GEN_DOC_VERSION}
 
 # add go.mod to allow datrails api module
-COPY go.mod /go/src/github.com/tokopedia/gripmock/go.mod
+COPY go-ext.mod /go/src/github.com/bavix/gripmock/go-ext.mod
+RUN cat /go/src/github.com/bavix/gripmock/go-ext.mod >> /go/src/github.com/bavix/gripmock/go.mod
 
 # ensure we download the datatrails common api generated code
 RUN go mod download github.com/datatrails/go-datatrails-common-api-gen

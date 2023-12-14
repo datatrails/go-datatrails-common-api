@@ -17,7 +17,7 @@ docker run -p 4770:4770 -p 4771:4771 -v ~/workspace/go-datatrails-common-api:/pr
 ## Now the gRPC server is up and running, we can add expectations of the assets grpc service:
 
 ```
-curl -X POST -d '{"service":"Assets", "method":"GetAsset","input":{"equals":{"uuid":"foo"}},"output":{"data":{"identity":"foo", "public":true}}}' localhost:4771/add
+curl -X POST -d '{"service":"Assets", "method":"GetAsset","input":{"equals":{"uuid":"foo"}},"output":{"data":{"identity":"foo", "public":true}}}' localhost:4771/api/stubs
 ```
 
 response:
