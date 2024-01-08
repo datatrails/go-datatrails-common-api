@@ -38,6 +38,31 @@ func (a *AssetResponse) AccessPolicyStringValue(name, defaultValue string) (stri
 	return value, nil
 }
 
+// IsPubliclyAttested determines if an asset is publicly attested
+// if public wallet address is present *anywhere* in the policy
+// we assume the asset is public as there is no other way of getting
+// public wallet to policy other than setting public: true on an asset
+// previous method was to specific and did not work with partial attestation
+func (a *AssetResponse) IsPubliclyAttested(publicWallet string) bool {
+
+	for attrs := range a.AccessPolicy {
+		data, ok := a.AccessPolicy[attrs].GetList()
+		if !ok {
+			continue
+		}
+
+		for _, v := range data {
+			if vv, ok := v[publicWallet]; ok {
+				if vv == "wallet" {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
 // IsSharedForWallet determines if the value identified by `attribute` is shared
 // with the organisation identified by `wallet`. `policyKey` determines the kind
 // of share: asset attribute or event attribute and whether it is a read share
