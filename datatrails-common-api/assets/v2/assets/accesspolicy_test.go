@@ -398,6 +398,102 @@ func TestAssetResponse_IsSharedForWallet_AssetAttributesMixedWildeReader(t *test
 	}
 }
 
+// TestAssetResponse_IsPubliclyAttested_AssetAttributesMixedWildeReader
+// Covers mixed read cases (wild card present in policy, all shares are read shares)
+func TestAssetResponse_IsPubliclyAttested_AssetAttributesMixedWildeReader(t *testing.T) {
+
+	type fields struct {
+		AccessPolicy map[string]*v2attribute.Attribute
+	}
+	type args struct {
+		policyKey string
+		wallet    string
+		attribute string
+	}
+
+	Wallet1 := "0xWALLET1"
+	Wallet2 := "0xWALLET2"
+	WalletWild := "0xWILD-WALLET"
+
+	TesseraPub1 := "b64-TESSERAPUB1"
+	TesseraPub2 := "b64-TESSERAPUB2"
+	TesseraPubWild := "b64-TESSERAPUB-WILD"
+	tractor_colour := "tractor_colour"
+	engine_size := "engine_size"
+
+	twoReadSharedAssetAttributesAndOneWildWallet := map[string]*v2attribute.Attribute{}
+
+	policyAddAssetAttributeReaderOrFailNow(
+		t, twoReadSharedAssetAttributesAndOneWildWallet, tractor_colour, Wallet1, TesseraPub1)
+	policyAddAssetAttributeReaderOrFailNow(
+		t, twoReadSharedAssetAttributesAndOneWildWallet, engine_size, Wallet2, TesseraPub2)
+	policyAddAssetAttributeReaderOrFailNow(
+		t, twoReadSharedAssetAttributesAndOneWildWallet, "*", WalletWild, TesseraPubWild)
+
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+		{
+			name: "Should match wildwallet in policy sharing two asset attributes",
+			fields: fields{
+				AccessPolicy: twoReadSharedAssetAttributesAndOneWildWallet,
+			},
+			args: args{
+				wallet: WalletWild,
+			},
+			want: true,
+		},
+		{
+			name: "Should match wildwallet in policy sharing two asset attributes",
+			fields: fields{
+				AccessPolicy: twoReadSharedAssetAttributesAndOneWildWallet,
+			},
+			args: args{
+				wallet: WalletWild,
+			},
+			want: true,
+		},
+
+		{
+			name: "Should match wallet1 in policy sharing two asset attributes",
+			fields: fields{
+				AccessPolicy: twoReadSharedAssetAttributesAndOneWildWallet,
+			},
+			args: args{
+				wallet: Wallet1,
+			},
+			want: true,
+		},
+
+		{
+			name: "Should match wallet2 in policy even partial share",
+			fields: fields{
+				AccessPolicy: twoReadSharedAssetAttributesAndOneWildWallet,
+			},
+			args: args{
+				wallet: Wallet2,
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := &AssetResponse{
+				AccessPolicy: tt.fields.AccessPolicy,
+			}
+			got := a.IsPubliclyAttested(tt.args.wallet)
+			if got != tt.want {
+				t.Errorf("AssetResponse.IsPubliclyAttested() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func policyAddAssetAttributeReaderOrFailNow(
 	t *testing.T,
 	policy map[string]*v2attribute.Attribute,

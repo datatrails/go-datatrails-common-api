@@ -253,17 +253,15 @@ tasks:
         # return for this. AND it makes iteratively generating proto changes
         # across repositories a lot more efficient
         sh: |
-          cd datatrails-common-api
-          echo $(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} google.golang.org/protobuf/cmd/protoc-gen-go)
+          echo $(./getproto.sh google.golang.org/protobuf/cmd/protoc-gen-go)
 
       GRPC_GATEWAY_DIR:
         sh: |
-          cd datatrails-common-api
-          echo $(dirname $(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/grpc-ecosystem/grpc-gateway/v2/runtime))
+          echo $(dirname $(./getproto.sh github.com/grpc-ecosystem/grpc-gateway/v2/runtime))
+          
       ENVOY_VALIDATE:
         sh: |
-          cd datatrails-common-api
-          echo $(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api go list -f {{"{{"}}.Dir{{"}}"}} github.com/envoyproxy/protoc-gen-validate)
+          echo $(./getproto.sh github.com/envoyproxy/protoc-gen-validate)
       
       SELF_INC: .
 
