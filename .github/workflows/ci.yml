@@ -21,7 +21,7 @@ jobs:
           go-version: '1.21.x'
           token: ${{ secrets.GITHUB_TOKEN }}
           cache-dependency-path: |
-            ./go.sum
+            datatrails-common-api/go.sum
       - name: Setup protobuf
         uses: arduino/setup-protoc@v2
         with:
