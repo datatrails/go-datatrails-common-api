@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.21.x'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup protobuf
         uses: arduino/setup-protoc@v2
         with:
