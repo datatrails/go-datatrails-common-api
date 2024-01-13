@@ -1,0 +1,53 @@
+// Maintainers, please refer to the style guide here:
+//     https://developers.google.com/protocol-buffers/docs/style
+syntax = "proto3";
+package archivist.v2;
+option go_package="github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets;assets";
+import "google/protobuf/timestamp.proto";
+
+// MerkeLogCommit provides the log entry details for a single mmr leaf.
+message MerkleLogCommit {
+    /* The mmr index */
+    uint64 index = 3;
+    /* The mmr *leaf* index */
+    uint64 leaf_index = 4; // TBD: this may be redundant.
+    /* time ordered and strictly unique per tenant. system wide
+     * unique with very reasonable operational assumptions. */
+    fixed64 idtimestamp = 5;
+}
+
+// The message sent from forestrie to avid notifying that the corresponding
+// event is commited to the tenants log.
+message MerkleLogCommitMessage {
+
+    // The tenant identity and the event identity for the committed event.
+    string tenant_identity = 1;
+    string event_identity = 2;
+    /* The time portion of idtimestamp that contributed to the hash of the event
+     * (the idtimestamp is _also_ included.
+     * This must be copied into event.timestamp_committed when the saas db is updated */
+    google.protobuf.Timestamp timestamp = 6;
+
+    uint32 log_version = 3;
+    uint32 log_epoch = 4;
+    MerkleLogCommit committed = 5;
+}
+
+
+
+// The details stored in the SaaS db for a proof mech MERKLE_LOG commitment
+message MerklLogEntry {
+
+    // The tenant log version and epoch when the log entry was created.
+    uint32 log_version = 1;
+    uint32 log_epoch = 2;
+
+    // Event trust level commited fields
+    MerkleLogCommit committed = 3;
+
+    // TODO: Event trust level confirmed fields
+
+    // signature over tenant mmr root
+
+    // TODO: Event trust level uniquivocal fields
+}

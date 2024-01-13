@@ -7,6 +7,13 @@ enum ConfirmationStatus {
     PENDING = 1;        // not yet committed
     CONFIRMED = 2;      // committed
     FAILED = 3;         // permanent failure
+
+	// Regarding the new statuses for forestrie,  See
+	// https://github.com/datatrails/epic-8120-scalable-proof-mechanisms/blob/main/event-trust-levels.md
+    STORED = 4; // forestrie, "its in the db"
+    COMMITTED = 5; // forestrie, "you can know if its changed"
+    // CONFIRMED = 6; // forestrie, "You can easily prove it changed"
+    UNEQUIVOCAL = 7; // forestrie, "You easily prove it was publicly available to all" 
 }
 
 enum TrackedStatus {

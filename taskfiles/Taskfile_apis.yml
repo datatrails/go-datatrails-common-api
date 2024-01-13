@@ -17,6 +17,8 @@ env_build: &env_build
   # The GOCACHE in a linux container on Docker for windows MUST be on a linuxy
   # file system
   GOCACHE: /tmp/datatrails/go-datatrails-common-api
+  GOBIN:
+    sh: echo ${GOBIN:-$HOME/go/bin}
 
 
 vars:
@@ -43,7 +45,9 @@ vars:
   # imports
   GOPKG_OVERRIDES: ",Mgoogle/protobuf/field_mask.proto=google.golang.org/genproto/protobuf/field_mask"
 
-  # Upstream proto definition files are placed here by the bootstrap tasks
+  # proto definition files whose versions can not be controlled by tools/go.mod
+  # are collected in proto-include by the bootstrap tasks. Note the grpc_health
+  # proto's are not currently versioned and are always taken from master
   GOOGLE_COMMON_PROTOS_VERSION: '{{.GOOGLE_COMMON_PROTOS_VERSION | default "1.50.0"}}'
   GOOGLE_COMMON_INC_ARCHIVE_BASEDIR: '{{.GOOGLE_COMMON_INC_ARCHIVE_BASEDIR | default "api-common-protos"}}'
 
@@ -96,11 +100,20 @@ tasks:
       - for ff in $(find . -name "*.swagger.json"); do rm -f $ff; done
 
   preflight:
-    summary: run prior to api generation tasks
+    summary: |
+      installs the tools/go.mod specified protoc plugins and .proto definitions
+      the common apis depend upon
+
+      And prepares the .proto's under proto-include so that consumers do not
+      need to replicate the arrangements for finding the proto include paths
+
     dir: '../datatrails-common-api'
+    vars:
+      API_PROTO_DEPS: >-
+        github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
+        github.com/envoyproxy/protoc-gen-validate
     cmds:
       - |
-        go mod download
         go get github.com/datatrails/go-datatrails-common-api-gen/tools
 
         go install \
@@ -111,6 +124,32 @@ tasks:
           github.com/envoyproxy/protoc-gen-validate \
           github.com/lyft/protoc-gen-star/v2 \
           github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc
+      - for: { var: API_PROTO_DEPS }
+        cmd: |
+          depdir=$(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api \
+            go list -f {{"{{"}}.Dir{{"}}"}} {{.ITEM}})
+
+          basedir=$(basename $depdir)
+          basedir=${basedir%%@*} # strip the go module version
+          rm -rf ../proto-include/${basedir}
+          for proto in $(find $depdir -type f -name "*.proto"); do
+            target=../proto-include/${basedir}/${proto#$depdir/}
+            mkdir -p $(dirname $target)
+            cp -v $proto $target
+          done
+          # find ../proto-include/${basedir}
+          # find $d -type f -name "*.proto"
+          # echo $(dirname $d)
+
+      # move things around so that consumers only need to -I proto-include,
+      # and do any general pruning or tidy up.
+      - |
+        # consumers of protoc-gen-validate expect a -I which allows them to do
+        # import "validate/validate.proto". And we don't need the java bindings or the example bindings
+        rm -rf ../proto-include/validate
+        mv -v ../proto-include/protoc-gen-validate/validate ../proto-include/
+        rm -rf ../proto-include/protoc-gen-validate
+
 
   postflight:
     summary: run after all api generation tasks
@@ -133,7 +172,6 @@ tasks:
       - |
         go build ./...
         go test ./...
-
 
   export:
     desc: export the sources to the desired DESTDIR
@@ -163,7 +201,9 @@ tasks:
         mkdir -p {{.DESTDIR}}/swagger
 
         # The source protos are all gathered under a 'google' common top dir
-        cp -vr ../proto-include/* {{.DESTDIR}}proto-include/
+        for d in $(ls -d ../proto-include/*);
+          do cp -vr $d {{.DESTDIR}}proto-include/
+        done
 
         for api in {{.APIS}}; do
           mkdir -vp {{.DESTDIR}}{{.COMMON_GODIR}}/${api}
@@ -220,7 +260,7 @@ tasks:
       # Generates the swagger definitions for the gRPC service.
       # Generates the html docs for the gRPC service.
       - |
-        protoc -I {{.SELF_INC}} {{.PROTOC_INC}} \
+        protoc -I . -I proto-include \
          --go_out=paths=source_relative:{{.OUTPATH}} \
          --go-grpc_out=paths=source_relative:{{.OUTPATH}} \
          --validate_out=lang=go,paths=source_relative:{{.OUTPATH}} \
@@ -239,35 +279,3 @@ tasks:
       OUTPATH: . 
       GOBIN:
         sh: echo ${GOBIN:-$HOME/go/bin}
-      # These variables capture the locations that .proto files for third party
-      # packages can be found at. The locations can change as a consequence of go
-      # mod module updates, so we require a dynamic approach.  The particularly
-      # grotty bit is the -f  argment - we need to pass -f {{.Dir}} to the go list
-      # command. To do so we have to prevent go template from evaluating it.
-      #
-      PROTO_GEN_GO_DIR:
-        # Notice; the tricksy 'cd datatrails-common-api' rather than just
-        # running in that directory via tasks 'dir:' directive is so that we can
-        # have the same import statements in the proto files *everywhere*. All
-        # consumers of datatrails-common-api get to do things very simply in
-        # return for this. AND it makes iteratively generating proto changes
-        # across repositories a lot more efficient
-        sh: |
-          echo $(./getproto.sh google.golang.org/protobuf/cmd/protoc-gen-go)
-
-      GRPC_GATEWAY_DIR:
-        sh: |
-          echo $(dirname $(./getproto.sh github.com/grpc-ecosystem/grpc-gateway/v2/runtime))
-          
-      ENVOY_VALIDATE:
-        sh: |
-          echo $(./getproto.sh github.com/envoyproxy/protoc-gen-validate)
-      
-      SELF_INC: .
-
-      # Global includes used for all protoc invocations.
-      # task sets cwd initially to the directory of the Taskfile.yml
-      PROTOC_INC: "-I {{.ENVOY_VALIDATE}} \
-        -I {{.PROTO_GEN_GO_DIR}} \
-        -I {{.GRPC_GATEWAY_DIR}} \
-        -I proto-include"

@@ -7,6 +7,7 @@ import "protoc-gen-openapiv2/options/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "datatrails-common-api/assets/v2/assets/enums.proto";
 import "datatrails-common-api/assets/v2/assets/principal.proto";
+import "datatrails-common-api/assets/v2/assets/merklelogentry.proto";
 import "datatrails-common-api/attribute/v2/attribute/attribute.proto";
 
 message EventResponse {
@@ -102,9 +103,9 @@ message EventResponse {
         read_only: true
     }];
 
-    // timestamp operation has been committed on the blockchain
+    // timestamp for when the event was committed to a verifiable log
     google.protobuf.Timestamp timestamp_committed = 7 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-        description: "time of event as recorded on blockchain"
+        description: "time of event as recorded in verifiable storage"
         read_only: true
     }];
 
@@ -135,6 +136,8 @@ message EventResponse {
         type: STRING
     }];
 
+    // NOTICE: We expect to retire simple hash and then remove all the top level dlt fields.
+
     // hash of transaction committing this operation on blockchain
     string transaction_id = 11 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
         description: "hash of the transaction as a hex string `0x11bf5b37e0b842e08dcfdc8c4aefc000`"
@@ -164,4 +167,17 @@ message EventResponse {
         "Identity of the tenant the that created this event"
         max_length: 1024
     }];
+
+    // An event has exactly one proof mechanism. This field caputures the proof
+    // mechanism specific details supporting the trustworthyness of the event
+    // record. We anticipate at least two proof mechs: merkle_log and
+    // verkle_log. We use oneof to avoid repeating the scattering of randomly
+    // re-purposed fields we currently have for simple hash vs khipu.
+    oneof proof_details {
+        MerklLogEntry merklelog_entry = 19 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description:
+            "verifiable merkle mmr log entry details"
+            max_length: 1024
+        }];
+    };
 }
