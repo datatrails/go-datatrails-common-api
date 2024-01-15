@@ -30,10 +30,7 @@ jobs:
       - name: Generate, Test and Export
         run: |
           # Note: it is by design that we don't use the builder
-          task apis:bootstrap
-          task apis:generate
-          task apis:test
-          task apis:export
+          task local-all
 
       - name: Show exports
         working-directory: exported/

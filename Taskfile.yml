@@ -68,21 +68,41 @@ tasks:
   # Primary workflow tasks 
   ### -------------------------
   all:
-    desc: "do everything necessary after clone (or rebase)"
+    desc: "do everything necessary after clone (or rebase) in the builder"
     cmds:
       - task: builder-start
       - defer: {task: builder-cleanup}
-      # These steps should exactly mirror the steps in .github/workflows/ci.yml
-      - docker exec -t {{.BUILD_CONTAINER}} task apis:bootstrap
-      - docker exec -t {{.BUILD_CONTAINER}} task apis:generate
-      - docker exec -t {{.BUILD_CONTAINER}} task apis:test
-      - docker exec -t {{.BUILD_CONTAINER}} task apis:export
+      - task: local-all
+
+  local-all:
+    desc: |
+      do everything necessary after clone (or rebase) (faster as it RUNS ON NATIVE HOST)
+
+      Note: This requires go and protoc installed on your host. If you are not
+      comfortable doing this then use dockerall.
+
+      ** The CI (ci.yml) uses this task and provides a clear illustration of the
+      pre-requisites. It does not use docker **
+
+    cmds:
+      - task: clean
+      - task: bootstrap
+      - task: generate
+      - task: apis:test
+      - task: apis:export
+
+  # 0. clean out generated and imported files
+  clean:
+    - rm -rf proto-include
+    - rm -rf exported
+    - task: apis:clean:generated
+
+  # 1. bootstrap (only needed post clone or rebase)
+  bootstrap:
+    - task: apis:bootstrap
 
   # 2. generate
   generate:
     desc: generates all the artifacts we need pre-build
     cmds:
-      - task: builder-start
-      - defer: {task: builder-cleanup}
-      # DO NOT add bootstrap here, use all instead
-      - docker exec -t {{.BUILD_CONTAINER}} task apis:generate
+      - task: apis:generate

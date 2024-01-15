@@ -2,6 +2,26 @@
 
 Common public api definitions for the DataTrails platform
 
+## Finding and including proto files for depdendecnies
+
+tools/go.mod is the source of truth for all proto providing dependencies. That file alone specifies both the upstream version we are using *and* is used, via go install, to make the .proto files available locally
+
+This corresponds to the practice recommended by grpc-gateway and elsewhere
+
+1. *** ALWAYS *** Use tools/go.mod to specify the dependency version.
+2. Add the package to the `go install` command in the apis:preflight task
+3. If necessary, add a var for the new path in any-api **and** then add a reference to that var in the PROTO_INC var.
+
+Following this practice removes the need for dual maintenance of dependency versions in the builder image. It also produces a build cycle that is significantly faster.
+
+Cross repository builds in docker while using go.work to refer to locally modified sources don't work. And this setup is essential for an efficient workflow.
+
+## bootstrap proto files
+
+The proto's for protoc itself, the googleapis, and the grpc_health proxy are needed by almost everything and are also don't apear to be compatible with the tools/go.mod approach
+
+For this reason we curl the proto's and make them available in our aggregate proto-includes archive
+
 ## Workflow for updating common apis
 
 ### Ensure the go tool chain is setup on your host
@@ -46,12 +66,11 @@ If you want to iterate on *just* the helper go code and there tests, do one roun
 
 `apis:bootstrap` -> `apis:clean:generated`
 
-Then just iterate using `apis:build`
-
+Then just iterate using `task apis:generate` and `task apis:test`
 
 #### For avid
 
-* task avid:xxx
+See the README.md in avid/src/api/README.md
 
 ##### Build one api against locally cloned go-datatrails-common-api
 
@@ -61,7 +80,3 @@ The protos can be included exactly as they are found from a clone of go-datatrai
         DATATRAILS_COMMON_API="../../go-datatrails-common-api"
 
 It is necessary however to run `task apis:bootsrap` after cloning go-datatrails-common
-        
-#### For forestrie
-
-* task:xxx

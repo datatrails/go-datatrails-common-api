@@ -1,0 +1,25 @@
+name: Developer Workflow Tests
+
+on:
+  # we ony run these on pull request as they significantly hinder developer feed
+  # back if they are triggered on push 
+  pull_request:
+    branches:
+      - main
+jobs:
+  docker-all:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup go-task
+        uses: arduino/setup-task@v1
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: docker all
+        run: |
+
+          echo "TODO: permissions on accessing our acr prevent this from working"
+          exit 0
+          # ensure the all target (which runs everything in docker) works
+          # task all
