@@ -36,14 +36,14 @@ message MerkleLogCommitMessage {
 
 
 // The details stored in the SaaS db for a proof mech MERKLE_LOG commitment
-message MerklLogEntry {
+message MerkleLogEntry {
 
     // The tenant log version and epoch when the log entry was created.
     uint32 log_version = 1;
     uint32 log_epoch = 2;
 
     // Event trust level commited fields
-    MerkleLogCommit committed = 3;
+    MerkleLogCommit commit = 3;
 
     // TODO: Event trust level confirmed fields
 
