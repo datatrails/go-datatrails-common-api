@@ -21,4 +21,5 @@ jobs:
 
           echo "TODO: permissions on accessing our acr prevent this from working"
           exit 0
-          # task dockerall
+          # ensure the all target (which runs everything in docker) works
+          # task all

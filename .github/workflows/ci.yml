@@ -30,7 +30,7 @@ jobs:
       - name: Generate, Test and Export
         run: |
           # Note: it is by design that we don't use the builder
-          task all
+          task local-all
 
       - name: Show exports
         working-directory: exported/

@@ -67,16 +67,16 @@ tasks:
   ### -------------------------
   # Primary workflow tasks 
   ### -------------------------
-  dockerall:
+  all:
     desc: "do everything necessary after clone (or rebase) in the builder"
     cmds:
       - task: builder-start
       - defer: {task: builder-cleanup}
-      - task: all
+      - task: local-all
 
-  all:
+  local-all:
     desc: |
-      do everything necessary after clone (or rebase)
+      do everything necessary after clone (or rebase) (faster as it RUNS ON NATIVE HOST)
 
       Note: This requires go and protoc installed on your host. If you are not
       comfortable doing this then use dockerall.

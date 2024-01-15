@@ -30,7 +30,7 @@ message MerkleLogCommitMessage {
 
     uint32 log_version = 3;
     uint32 log_epoch = 4;
-    MerkleLogCommit committed = 5;
+    MerkleLogCommit commit = 5;
 }
 
 
