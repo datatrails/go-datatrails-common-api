@@ -8,12 +8,32 @@ import "google/protobuf/timestamp.proto";
 // MerkeLogCommit provides the log entry details for a single mmr leaf.
 message MerkleLogCommit {
     /* The mmr index */
-    uint64 index = 3;
+    uint64 index = 1;
     /* The mmr *leaf* index */
-    uint64 leaf_index = 4; // TBD: this may be redundant.
+    uint64 leaf_index = 2; // TBD: this may be redundant.
     /* time ordered and strictly unique per tenant. system wide
      * unique with very reasonable operational assumptions. */
-    fixed64 idtimestamp = 5;
+    fixed64 idtimestamp = 3;
+}
+
+message MerkleLogCommitMongoDB {
+
+    // Note that should we ever have more than 2^63  events in a tenant log, the
+    // index and leaf_index fields will not persist to mongo.
+
+    /* The mmr index */
+    uint64 index = 1;
+    /* The mmr *leaf* index */
+    uint64 leaf_index = 2; // TBD: this may be redundant.
+
+    /* time ordered and strictly unique per tenant. system wide
+     * unique with very reasonable operational assumptions.
+     *
+     * EXPRESSED AS A 16 character padded hex string because mongo db does not
+     * support unsigned integers and we need all 64 bits to get a sensible epoch
+     * duration.
+     */
+    string idtimestamp = 3;
 }
 
 // The message sent from forestrie to avid notifying that the corresponding
@@ -42,8 +62,10 @@ message MerkleLogEntry {
     uint32 log_version = 1;
     uint32 log_epoch = 2;
 
-    // Event trust level commited fields
-    MerkleLogCommit commit = 3;
+    // Event trust level commited fields. Note that we have to use a special
+    // message because mongo db does not support unsigned integers. If/when we
+    // move away from that, we can move this ordinal safely into a oneof
+    MerkleLogCommitMongoDB commit = 3;
 
     // TODO: Event trust level confirmed fields
 
