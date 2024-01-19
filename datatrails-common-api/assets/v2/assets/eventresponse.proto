@@ -173,11 +173,14 @@ message EventResponse {
     // record. We anticipate at least two proof mechs: merkle_log and
     // verkle_log. We use oneof to avoid repeating the scattering of randomly
     // re-purposed fields we currently have for simple hash vs khipu.
-    oneof proof_details {
-        MerkleLogEntry merklelog_entry = 19 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-            description:
-            "verifiable merkle mmr log entry details"
-            max_length: 1024
-        }];
-    };
+
+
+    // proof details for proof_mechanism MERKLE_LOG
+    MerkleLogEntry merklelog_entry = 19 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description:
+        "verifiable merkle mmr log entry details",
+        // see https://github.com/grpc-ecosystem/grpc-gateway/blob/master/protoc-gen-openapiv2/options/openapiv2.proto
+        //  for specific types.
+        type: OBJECT
+    }];
 }
