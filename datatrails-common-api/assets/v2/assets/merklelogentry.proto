@@ -7,34 +7,31 @@ import "google/protobuf/timestamp.proto";
 
 // MerkeLogCommit provides the log entry details for a single mmr leaf.
 message MerkleLogCommit {
-    /* The mmr index */
-    uint64 index = 1;
-    /* The mmr *leaf* index */
-    uint64 leaf_index = 2; // TBD: this may be redundant.
-    /* time ordered and strictly unique per tenant. system wide
-     * unique with very reasonable operational assumptions. */
-    fixed64 idtimestamp = 3;
-}
-
-message MerkleLogCommitMongoDB {
-
-    // Note that should we ever have more than 2^63  events in a tenant log, the
-    // index and leaf_index fields will not persist to mongo.
 
     /* The mmr index */
     uint64 index = 1;
-    /* The mmr *leaf* index */
-    uint64 leaf_index = 2; // TBD: this may be redundant.
 
-    /* time ordered and strictly unique per tenant. system wide
-     * unique with very reasonable operational assumptions.
-     *
-     * EXPRESSED AS A 16 character padded hex string because mongo db does not
-     * support unsigned integers and we need all 64 bits to get a sensible epoch
-     * duration.
-     */
-    string idtimestamp = 3;
+    /* time ordered and strictly unique per tenant. system wide unique with very
+     * reasonable operational assumptions. prefixed with time epoch if len > 8
+     * bytes (after conversion back from hex). */
+    string idtimestamp = 2;
 }
+
+message MerkleLogConfirm {
+
+    // The following correspond to mmrblobs.MMRState
+    uint64 mmr_size = 1;
+
+    bytes root = 2;
+    // The regular unix time the root was signed
+    int64 timestamp = 3;
+    // The idtimestamp of the last leaf under mmr_size. prefixed with time epoch if len > 8 bytes (after conversion back from hex)
+    string idtimestamp = 4;
+    // The signed merkle tree head state at mmr_size. Contains COSE Sign1 formatted message.
+    bytes signed_tree_head = 5;
+}
+
+message MerkleLogUnequivocal { }
 
 // The message sent from forestrie to avid notifying that the corresponding
 // event is commited to the tenants log.
@@ -43,33 +40,33 @@ message MerkleLogCommitMessage {
     // The tenant identity and the event identity for the committed event.
     string tenant_identity = 1;
     string event_identity = 2;
-    /* The time portion of idtimestamp that contributed to the hash of the event
-     * (the idtimestamp is _also_ included.
-     * This must be copied into event.timestamp_committed when the saas db is updated */
-    google.protobuf.Timestamp timestamp = 6;
+    // The time portion of idtimestamp that contributed to the hash of the event
+    google.protobuf.Timestamp timestamp = 3;
 
-    uint32 log_version = 3;
-    uint32 log_epoch = 4;
-    MerkleLogCommit commit = 5;
+    MerkleLogCommit commit = 4;
 }
 
+message MerkleLogConfirmMessage {
 
+    string tenant_identity = 1;
+
+    MerkleLogConfirm confirm = 2;
+}
+
+message MerkleLogUnequivocalMessage {
+    string tenant_identity = 1;
+    MerkleLogUnequivocal unequivocal = 2;
+}
 
 // The details stored in the SaaS db for a proof mech MERKLE_LOG commitment
 message MerkleLogEntry {
 
-    // The tenant log version and epoch when the log entry was created.
-    uint32 log_version = 1;
-    uint32 log_epoch = 2;
+    // Event trust level COMMITTED details
+    MerkleLogCommit commit = 1;
 
-    // Event trust level commited fields. Note that we have to use a special
-    // message because mongo db does not support unsigned integers. If/when we
-    // move away from that, we can move this ordinal safely into a oneof
-    MerkleLogCommitMongoDB commit = 3;
+    // Event trust level CONFIRMED details
+    MerkleLogConfirm confirm = 2;
 
-    // TODO: Event trust level confirmed fields
-
-    // signature over tenant mmr root
-
-    // TODO: Event trust level uniquivocal fields
+    // Event trust level UNEQUIVOCAL details
+    MerkleLogUnequivocal unequivocal = 3;
 }
