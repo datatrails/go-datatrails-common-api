@@ -20,28 +20,51 @@ func TestFilterParsing(t *testing.T) {
 		values         url.Values
 		parser         runtime.QueryParameterParser
 		isError        bool
-		expectedResult []string
+		expectedResult [][]string
 	}{
 		{
 			name:           "test simple or",
 			message:        &assets.ListAssetsRequest{},
 			values:         map[string][]string{"filters": {"attributes.foo=2 OR attributes.bar=2"}},
 			parser:         &runtime.DefaultQueryParser{},
-			expectedResult: []string{"attributes.foo=2", "attributes.bar=2"},
+			expectedResult: [][]string{{"attributes.foo=2", "attributes.bar=2"}},
+		},
+		{
+			name:           "test multiple or",
+			message:        &assets.ListAssetsRequest{},
+			values:         map[string][]string{"filters": {"attributes.foo=2 OR attributes.bar=2", "attributes.foo=dd OR attributes.bar=77"}},
+			parser:         &runtime.DefaultQueryParser{},
+			expectedResult: [][]string{{"attributes.foo=2", "attributes.bar=2"}, {"attributes.foo=dd", "attributes.bar=77"}},
 		},
 		{
 			name:           "test or *",
 			message:        &assets.ListAssetsRequest{},
 			values:         map[string][]string{"filters": {"attributes.foo=* oR attributes.bar=2"}},
 			parser:         &runtime.DefaultQueryParser{},
-			expectedResult: []string{"attributes.foo=*", "attributes.bar=2"},
+			expectedResult: [][]string{{"attributes.foo=*", "attributes.bar=2"}},
 		},
 		{
 			name:           "test or 5 terms",
 			message:        &assets.ListAssetsRequest{},
 			values:         map[string][]string{"filters": {"attributes.foo=2 or attributes.bar=2 OR attributes.lop=2 oR attributes.foo=22 Or attributes.bar=77"}},
 			parser:         &runtime.DefaultQueryParser{},
-			expectedResult: []string{"attributes.foo=2", "attributes.bar=2", "attributes.lop=2", "attributes.foo=22", "attributes.bar=77"},
+			expectedResult: [][]string{{"attributes.foo=2", "attributes.bar=2", "attributes.lop=2", "attributes.foo=22", "attributes.bar=77"}},
+		},
+		{
+			name:    "test 4 filter terms",
+			message: &assets.ListAssetsRequest{},
+			values: map[string][]string{"filters": {
+				"attributes.foo=2 or attributes.bar=2 OR attributes.lop=2",
+				"attribtues.basss=e88 oR attributes.foxo=22",
+				"attribtues.ba=e oR attributes.foo=22 Or attributes.bar=77",
+				"something=xx oR attributes.gg=22 Or attributes.bar=87",
+			}},
+			parser: &runtime.DefaultQueryParser{},
+			expectedResult: [][]string{
+				{"attributes.foo=2", "attributes.bar=2", "attributes.lop=2"},
+				{"attribtues.basss=e88", "attributes.foxo=22"},
+				{"attribtues.ba=e", "attributes.foo=22", "attributes.bar=77"},
+				{"something=xx", "attributes.gg=22", "attributes.bar=87"}},
 		},
 		{
 			name:           "test bad filter",
@@ -49,7 +72,7 @@ func TestFilterParsing(t *testing.T) {
 			values:         map[string][]string{"filters": {"attributes.foo=2 OF attributes.bar=2"}},
 			parser:         &runtime.DefaultQueryParser{},
 			isError:        true,
-			expectedResult: []string{},
+			expectedResult: [][]string{},
 		},
 		{
 			name:    "test nil message",
@@ -68,7 +91,12 @@ func TestFilterParsing(t *testing.T) {
 				assert.Nil(t, result)
 			}
 			if result == nil && test.message != nil {
-				assert.Equal(t, test.message.Filters[0].Or, test.expectedResult)
+
+				assert.Equal(t, len(test.message.Filters), len(test.expectedResult))
+				for idx, expected := range test.expectedResult {
+					assert.Equal(t, test.message.Filters[idx].Or, expected)
+				}
+
 			}
 		})
 	}
