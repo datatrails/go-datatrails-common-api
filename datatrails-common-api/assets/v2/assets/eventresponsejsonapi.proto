@@ -177,8 +177,8 @@ message EventResponseJSONAPI {
 
    // An event has exactly one proof mechanism. This field caputures the proof
    // mechanism specific details supporting the trustworthyness of the event
-   // record. We anticipate at least two proof mechs: merkle_log and
-   // verkle_log. But oneof exposes us too many tooling issues
+   // record. More than one proof mech type is likely, but using oneof here has
+   // proven to expose us to open ended tooling compatibility issues.
 
    // proof details for proof_mechanism MERKLE_LOG
    MerkleLogEntry merklelog_entry = 19 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
