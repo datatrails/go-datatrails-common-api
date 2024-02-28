@@ -225,31 +225,36 @@ func handleFilters(msg protoreflect.ProtoMessage, p runtime.QueryParameterParser
 
 	// did user specify any filters in the query string
 	if values.Has(string(prop.Name())) {
-		// get the filters from query
-		filterSpec := values.Get(string(prop.Name()))
-
-		// split the filter terms
-		filters, err := getFilterParts(filterSpec)
-		if err != nil {
-			return err
-		}
 
 		// create mutable 'filters' property
 		filtersMutable := msg.ProtoReflect().Mutable(prop)
-		// append new filter to the list
-		newFilter := filtersMutable.List().NewElement()
-		// get the descriptor for the 'or' element of a filter
-		orDesc := newFilter.Message().Descriptor().Fields().ByJSONName("or")
-		// create mutable 'or' proprty of a filter
-		or := newFilter.Message().Mutable(orDesc)
 
-		// append our terms eg. attributes.foo=5 to the 'or'
-		for _, term := range filters {
-			v := protoreflect.ValueOf(term)
-			or.List().Append(v)
+		// get the filters from query
+		//filterSpec := values.Get(string(prop.Name()))
+		filterSpecs := values[string(prop.Name())]
+		for _, filterSpec := range filterSpecs {
+
+			// split the filter terms
+			filters, err := getFilterParts(filterSpec)
+			if err != nil {
+				return err
+			}
+
+			// append new filter to the list
+			newFilter := filtersMutable.List().NewElement()
+			// get the descriptor for the 'or' element of a filter
+			orDesc := newFilter.Message().Descriptor().Fields().ByJSONName("or")
+			// create mutable 'or' proprty of a filter
+			or := newFilter.Message().Mutable(orDesc)
+
+			// append our terms eg. attributes.foo=5 to the 'or'
+			for _, term := range filters {
+				v := protoreflect.ValueOf(term)
+				or.List().Append(v)
+			}
+			// append our new filter to 'filters'
+			filtersMutable.List().Append(newFilter)
 		}
-		// append our new filter to 'filters'
-		filtersMutable.List().Append(newFilter)
 	}
 
 	return nil

@@ -72,7 +72,7 @@ tasks:
     cmds:
       - task: builder-start
       - defer: {task: builder-cleanup}
-      - task: local-all
+      - docker exec -t {{.BUILD_CONTAINER}} task local-all
 
   local-all:
     desc: |
