@@ -176,15 +176,11 @@ message EventResponse {
     // An event has exactly one proof mechanism. On any event only the entry
     // corresponding to the chosen proof mechanism will be present. (Note that
     // onfof exposes us to to many tooling compatibility issues)
-
-    // proof details for proof_mechanism MERKLE_LOG
-    oneof proof_details {
-        MerkleLogEntry merklelog_entry = 19 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-            description:
-            "verifiable merkle mmr log entry details",
-            // see https://github.com/grpc-ecosystem/grpc-gateway/blob/master/protoc-gen-openapiv2/options/openapiv2.proto
-            //  for specific types.
-            type: OBJECT
-        }];
-    }
+    MerkleLogEntry merklelog_entry = 19 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description:
+        "verifiable merkle mmr log entry details",
+        // see https://github.com/grpc-ecosystem/grpc-gateway/blob/master/protoc-gen-openapiv2/options/openapiv2.proto
+        //  for specific types.
+        type: OBJECT
+    }];
 }
