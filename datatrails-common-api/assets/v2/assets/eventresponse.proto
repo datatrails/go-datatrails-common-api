@@ -173,9 +173,12 @@ message EventResponse {
         max_length: 1024
     }];
 
-    // An event has exactly one proof mechanism. On any event only the entry
-    // corresponding to the chosen proof mechanism will be present. (Note that
-    // onfof exposes us to to many tooling compatibility issues)
+    // An event has exactly one proof mechanism. This field caputures the proof
+    // mechanism specific details supporting the trustworthyness of the event
+    // record. We anticipate at least two proof mechs: merkle_log and
+    // verkle_log. But oneof exposes us too many tooling issues
+
+    // proof details for proof_mechanism MERKLE_LOG
     MerkleLogEntry merklelog_entry = 19 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
         description:
         "verifiable merkle mmr log entry details",
