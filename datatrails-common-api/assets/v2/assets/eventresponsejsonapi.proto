@@ -175,17 +175,15 @@ message EventResponseJSONAPI {
         max_length: 1024
     }];
 
-    // An event has exactly one proof mechanism. This field caputures the proof
-    // mechanism specific details supporting the trustworthyness of the event
-    // record. We anticipate at least two proof mechs: merkle_log and
-    // verkle_log. We use oneof to avoid repeating the scattering of randomly
-    // re-purposed fields we currently have for simple hash vs khipu.
-    oneof proof_details {
-        // proof details for proof_mechanism MERKLE_LOG
-        MerkleLogEntry merklelog_entry = 19 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-            description:
-            "verifiable merkle mmr log entry details"
-            max_length: 1024
-        }];
-    };
+   // An event has exactly one proof mechanism. This field caputures the proof
+   // mechanism specific details supporting the trustworthyness of the event
+   // record. More than one proof mech type is likely, but using oneof here has
+   // proven to expose us to open ended tooling compatibility issues.
+
+   // proof details for proof_mechanism MERKLE_LOG
+   MerkleLogEntry merklelog_entry = 19 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+       description:
+       "verifiable merkle mmr log entry details"
+       max_length: 1024
+   }];
 }
