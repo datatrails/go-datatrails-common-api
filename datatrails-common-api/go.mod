@@ -3,7 +3,7 @@ module github.com/datatrails/go-datatrails-common-api-gen
 // Note: the go code is hosted in github.com/datatrails/go-datatrails-common-api-gen
 // hence the module name
 
-go 1.21
+go 1.22
 
 // This allows this module to operate as tho it were the generated module. This
 // allows us to manage the proto tool dependencies via this go.mod. This go.mod
