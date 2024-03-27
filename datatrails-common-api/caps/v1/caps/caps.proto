@@ -36,6 +36,13 @@ message Cap {
         (validate.rules).int64.gte = -1
     ];
 
+    int64 resource_cap = 3 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "Resource cap"
+        },
+        (validate.rules).int64.gte = -1
+    ];
+
 }
 
 message Caps {
