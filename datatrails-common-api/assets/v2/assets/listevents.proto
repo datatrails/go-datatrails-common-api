@@ -139,6 +139,9 @@ message ListEventsRequest {
             description: "filters"
         }
     ];
+
+    // filter events by mmr index
+    int32 mmr_index = 24 [(validate.rules).int32.gte = 0];
 }
 
 message ListEventsResponse {
