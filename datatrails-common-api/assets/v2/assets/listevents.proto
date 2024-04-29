@@ -142,6 +142,13 @@ message ListEventsRequest {
 
     // filter events by mmr index
     optional int64 mmr_index = 24 [(validate.rules).int64.gte = 0];
+
+    // filter from wallet address
+    optional string from = 25 [
+        (validate.rules).string = {
+            pattern: "^0x[[:xdigit:]]+$"
+        }
+    ];
 }
 
 message ListEventsResponse {
