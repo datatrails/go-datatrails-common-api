@@ -264,15 +264,15 @@ func getFilterParts(spec string) ([]string, error) {
 	filters := []string{}
 
 	// greedy match for stuff surrounded by single quotes
-	matchQuote := `'((?:[^']|.)*)'`
+	matchQuote := `'((?:[^'\\]|\\.)*)'`
 	q, err := regexp.Compile(matchQuote)
 	if err != nil {
 		return filters, err
 	}
 
 	// match fiter-ish thing - some attribute equals to a value in quotes with spaces
-	// or continues string
-	matchTerm := `(\S+?)=(('.+')|(\S+?))(\s|$)`
+	// or continous string
+	matchTerm := `(\S+?)=(('((?:[^'\\]|\\.)*)')|(\S+?))(\s|$)`
 	r, err := regexp.Compile(matchTerm)
 	if err != nil {
 		return filters, err
@@ -285,8 +285,9 @@ func getFilterParts(spec string) ([]string, error) {
 			term := r.FindStringSubmatch(filterSpec)
 			// trim excessive unquoted spaces and trim the part we're processing
 			filterSpec = strings.TrimSpace(strings.TrimPrefix(filterSpec, term[0]))
-			// trim outer quotes if they are present
+			// trim outer quotes if they are present and replace the escape sequences
 			t := q.ReplaceAllString(term[2], "$1")
+			t = strings.ReplaceAll(t, "\\'", "'")
 			// append our new term to filters list
 			filters = append(filters, fmt.Sprintf("%s=%s", strings.TrimSpace(term[1]), t))
 			// check if we have anything left
@@ -294,7 +295,7 @@ func getFilterParts(spec string) ([]string, error) {
 				// if we have an or we remove it, otherwise we fail
 				// as we have some additonal unexpected text
 				if !strings.HasPrefix(strings.ToLower(filterSpec), "or ") {
-					return filters, fmt.Errorf("malformd filter")
+					return filters, fmt.Errorf("malformed filter")
 				}
 				filterSpec = filterSpec[3:]
 			}

@@ -32,9 +32,9 @@ func TestFilterParsing(t *testing.T) {
 		{
 			name:           "test multiple or",
 			message:        &assets.ListAssetsRequest{},
-			values:         map[string][]string{"filters": {"attributes.foo=2 OR attributes.bar=2", "attributes.foo=dd OR attributes.bar=77"}},
+			values:         map[string][]string{"filters": {"attributes.foo='2' OR attributes.bar=2", "attributes.foo='dd xx' OR attributes.bar='77'"}},
 			parser:         &runtime.DefaultQueryParser{},
-			expectedResult: [][]string{{"attributes.foo=2", "attributes.bar=2"}, {"attributes.foo=dd", "attributes.bar=77"}},
+			expectedResult: [][]string{{"attributes.foo=2", "attributes.bar=2"}, {"attributes.foo=dd xx", "attributes.bar=77"}},
 		},
 		{
 			name:           "test or *",
@@ -118,12 +118,12 @@ func TestGetFilterParts(t *testing.T) {
 		},
 		{
 			name:           "test different cases",
-			filterSpec:     "attributes.foo=2 OR attributes.bar=' stuff or 245677 some 'other' stuff' oR foo.bar=single or bar.baz=popmo Or pop=push_1",
+			filterSpec:     `attributes.foo=2 OR attributes.bar=' stuff or 245677 some \'other\' stuff' oR foo.bar=single or bar.baz=popmo Or pop=push_1`,
 			expectedResult: []string{"attributes.foo=2", "attributes.bar= stuff or 245677 some 'other' stuff", "foo.bar=single", "bar.baz=popmo", "pop=push_1"},
 		},
 		{
 			name:           "test quoted",
-			filterSpec:     "attributes.foo=2 or attributes.bar=''something' or = 'else''",
+			filterSpec:     "attributes.foo=2 or attributes.bar='\\'something\\' or = \\'else\\''",
 			expectedResult: []string{"attributes.foo=2", "attributes.bar='something' or = 'else'"},
 		},
 		{
