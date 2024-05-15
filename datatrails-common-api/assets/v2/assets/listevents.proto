@@ -149,6 +149,17 @@ message ListEventsRequest {
             pattern: "^0x[[:xdigit:]]+$"
         }
     ];
+
+    optional ConfirmationStatus minimum_trust = 26 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "specify the minimum trust level for Events "
+                "COMMITTED -> COMMITTED, CONFIRMED, UNEQUIVOCAL "
+                "CONFIRMED -> CONFIRMED, UNEQUIVOCAL "
+                "UNEQUIVOCAL -> UNEQUIVOCAL"
+            type: STRING
+        },
+        (validate.rules).enum.defined_only = true
+    ];
 }
 
 message ListEventsResponse {
