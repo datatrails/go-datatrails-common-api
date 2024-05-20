@@ -17,6 +17,29 @@ message MerkleLogCommit {
     string idtimestamp = 2;
 }
 
+message MerkleLogActiveItem {
+    string tenant_identity = 1;
+    // -1 indicates not set
+    int64 massif = 2;
+    // -1 indicates not set
+    int64 seal = 3;
+    // Note: It is both ok and likely that occasionally the massif and seal
+    // numbers will differ or be absent. absence is indicated by negation.
+
+    // the most recent last ids in the blob tag index for the massif and the seal
+    string massif_lastid = 4;
+    string seal_lastid = 5;
+}
+
+message MerkleLogActiveSince {
+    // The idtimestamp used for the lastid > idtimestamp filter
+    string since_idtimestamp = 1;
+    // The regular unix time, in milliseconds, the watch set was create
+    int64 timestamp_ms = 2;
+
+    repeated MerkleLogActiveItem items = 3;
+}
+
 message MerkleLogConfirm {
 
     // The following correspond to mmrblobs.MMRState
