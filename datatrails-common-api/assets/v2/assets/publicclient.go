@@ -9,8 +9,8 @@ type PublicClient struct {
         Client PublicAssetsClient
 }
 
-func NewPublicClient(log Logger, address string, opts ...ClientOption) *Client {
-        return &Client{
+func NewPublicClient(log Logger, address string, opts ...ClientOption) *PublicClient {
+        return &PublicClient{
                 g: grpcclient.New(log, "publicassetsv2", address, opts...),
         }
 }
