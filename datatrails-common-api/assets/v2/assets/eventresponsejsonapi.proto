@@ -11,7 +11,6 @@ syntax = "proto3";
 package archivist.v2;
 option go_package="github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets;assets";
 import "protoc-gen-openapiv2/options/annotations.proto";
-import "datatrails-common-api/assets/v2/assets/enums.proto";
 import "datatrails-common-api/assets/v2/assets/principal.proto";
 import "datatrails-common-api/assets/v2/assets/merklelogentry.proto";
 

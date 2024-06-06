@@ -160,6 +160,13 @@ message ListEventsRequest {
         },
         (validate.rules).enum.defined_only = true
     ];
+
+    optional string transaction_id = 27 [
+        (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+            description: "hash of transaction commiting this event to blockchain"
+            type: STRING
+        }
+    ];
 }
 
 message ListEventsResponse {
