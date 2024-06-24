@@ -25,7 +25,7 @@ message CreateAssetRequest {
             "   \"arc_display_name\": \"My Garden Fence\", "
             "   \"colour\": \"Plain wood\" "
             "}, "
-            "\"proof_mechanism\": \"SIMPLE_HASH\","
+            "\"proof_mechanism\": \"MERKLE_LOG\","
             "\"public\": false"
             "}"
     };

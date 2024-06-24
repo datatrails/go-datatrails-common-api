@@ -22,7 +22,7 @@ enum TrackedStatus {
 enum ProofMechanism {
     PROOF_MECHANISM_UNSPECIFIED = 0;
     RESERVED1 = 1;
-    SIMPLE_HASH = 2;
+    RESERVED2 = 2;
     MERKLE_LOG = 3;
 }
 
