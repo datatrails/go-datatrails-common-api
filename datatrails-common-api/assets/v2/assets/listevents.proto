@@ -43,10 +43,12 @@ message ListEventsRequest {
     Principal principal_declared = 6;
     Principal principal_accepted = 7;
 
-    // what was field 8 called?
     reserved 8;
+    reserved "attributes";
 
-    // where are fields 9,10 ?
+    // AFAICT fields 9 and 10 were skipped over when the message was first defined. Reserving
+    // for safety.
+    reserved 9, 10;
 
     // Filtering
     google.protobuf.Timestamp timestamp_accepted_since = 11 [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
