@@ -17,6 +17,7 @@ message CreateEventRequest {
             description:
             "Request creating RecordEvidence event "
             "Specify `operation` to chose which RecordEvidence event to create "
+            required: ["behaviour", "operation"]
         }
         example:"{ "
             "\"operation\": \"Record\", "
