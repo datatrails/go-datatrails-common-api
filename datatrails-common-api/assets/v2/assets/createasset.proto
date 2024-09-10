@@ -17,6 +17,7 @@ message CreateAssetRequest {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
         json_schema: {
             description: "This describes the body of a request to create a new Asset."
+            // required is empty as all fields are populated with defaults
         }
         example:"{ "
             "\"behaviours\": [\"RecordEvidence\"], "
