@@ -7,8 +7,8 @@ import (
 type ClientOption = grpcclient.ClientOption
 
 type Client struct {
+        AssetsClient
         g      *grpcclient.Client
-        Client AssetsClient
 }
 
 func NewClient(log Logger, address string, opts ...ClientOption) *Client {
@@ -18,14 +18,14 @@ func NewClient(log Logger, address string, opts ...ClientOption) *Client {
 }
 
 func (c *Client) Open() error {
-        if c.Client != nil {
+        if c.AssetsClient != nil {
                 return nil
         }
         err := c.g.Open()
         if err != nil {
                 return err
         }
-        c.Client = NewAssetsClient(c.g.Connector())
+        c.AssetsClient = NewAssetsClient(c.g.Connector())
         return nil
 }
 
