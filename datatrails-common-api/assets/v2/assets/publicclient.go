@@ -5,8 +5,8 @@ import (
 )
 
 type PublicClient struct {
+        PublicAssetsClient
         g      *grpcclient.Client
-        Client PublicAssetsClient
 }
 
 func NewPublicClient(log Logger, address string, opts ...ClientOption) *PublicClient {
@@ -16,14 +16,14 @@ func NewPublicClient(log Logger, address string, opts ...ClientOption) *PublicCl
 }
 
 func (c *PublicClient) Open() error {
-        if c.Client != nil {
+        if c.PublicAssetsClient != nil {
                 return nil
         }
         err := c.g.Open()
         if err != nil {
                 return err
         }
-        c.Client = NewPublicAssetsClient(c.g.Connector())
+        c.PublicAssetsClient = NewPublicAssetsClient(c.g.Connector())
         return nil
 }
 

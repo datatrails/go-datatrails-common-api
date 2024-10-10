@@ -11,7 +11,7 @@ go 1.22
 // replace github.com/datatrails/go-datatrails-common-api-gen => ./
 
 require (
-	github.com/datatrails/go-datatrails-common v0.18.0
+	github.com/datatrails/go-datatrails-common v0.18.1
 	github.com/envoyproxy/protoc-gen-validate v1.0.4
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
@@ -31,7 +31,7 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
@@ -41,16 +41,16 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/mwitkow/go-proto-validators v0.3.2 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/pseudomuto/protokit v0.2.1 // indirect
 	github.com/rogpeppe/go-internal v1.6.1 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
-	go.uber.org/zap v1.25.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
+	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.25.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240624140628-dc46fd24d27d // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
 )
