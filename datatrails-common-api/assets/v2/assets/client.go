@@ -4,6 +4,12 @@ import (
         "github.com/datatrails/go-datatrails-common/grpcclient"
 )
 
+type AssetsClientCloser interface {
+        AssetsClient
+        Open() error
+        Close()
+}
+
 type ClientOption = grpcclient.ClientOption
 
 type Client struct {
