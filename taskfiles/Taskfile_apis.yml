@@ -80,7 +80,6 @@ tasks:
         rm -rf {{.GOOGLE_COMMON_INC_ARCHIVE_BASEDIR}}-{{.GOOGLE_COMMON_PROTOS_VERSION}}
         find proto-include -type d
 
-
   bootstrap:grpc_health:
     desc: download and prepare the grpc health definitions we require under proto-include
     dir: '..'
@@ -114,15 +113,12 @@ tasks:
         github.com/envoyproxy/protoc-gen-validate
     cmds:
       - |
-        go get github.com/datatrails/go-datatrails-common-api-gen/tools
-
         go install \
           github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
           github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
           google.golang.org/protobuf/cmd/protoc-gen-go \
           google.golang.org/grpc/cmd/protoc-gen-go-grpc \
           github.com/envoyproxy/protoc-gen-validate \
-          github.com/lyft/protoc-gen-star/v2 \
           github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc
       - for: { var: API_PROTO_DEPS }
         cmd: |
@@ -156,6 +152,7 @@ tasks:
     dir: '../datatrails-common-api'
     cmds:
       - go mod tidy
+      - go mod verify
 
   generate:
     desc: generate api grpc bindings

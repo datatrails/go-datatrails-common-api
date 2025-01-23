@@ -29,8 +29,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Generate, Test and Export
         run: |
-          # Note: it is by design that we don't use the builder
-          task local-all
+          task all
 
       - name: Show exports
         working-directory: exported/
