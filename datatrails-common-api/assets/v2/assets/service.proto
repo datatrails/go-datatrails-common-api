@@ -6,17 +6,16 @@ option go_package="github.com/datatrails/go-datatrails-common-api-gen/assets/v2/
 
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
-
-import "datatrails-common-api/assets/v2/assets/assetresponse.proto";
+import "datatrails-common-api/caps/v1/caps/caps.proto";
 import "datatrails-common-api/assets/v2/assets/createasset.proto";
+import "datatrails-common-api/assets/v2/assets/assetresponse.proto";
+import "datatrails-common-api/assets/v2/assets/getasset.proto";
+import "datatrails-common-api/assets/v2/assets/listassets.proto";
 import "datatrails-common-api/assets/v2/assets/createevent.proto";
 import "datatrails-common-api/assets/v2/assets/eventresponse.proto";
-import "datatrails-common-api/assets/v2/assets/getasset.proto";
 import "datatrails-common-api/assets/v2/assets/getevent.proto";
-import "datatrails-common-api/assets/v2/assets/listassets.proto";
 import "datatrails-common-api/assets/v2/assets/listevents.proto";
 import "datatrails-common-api/assets/v2/assets/miscmessages.proto";
-import "datatrails-common-api/caps/v1/caps/caps.proto";
 
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     info: {
@@ -25,33 +24,20 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
         version: "2.0"
         contact: {
             name: "DataTrails"
-            url: "https://www.datatrails.com"
+            url: "https://www.datatrails.ai"
         }
     };
-    base_path: "/_api";
+    base_path: "/archivist/v2/assets";
     schemes: HTTPS;
     consumes: "application/json";
     produces: "application/json";
     tags: [
         {
-            name: "Assets & Events",
+            name: "Assets and Events",
             description: "Primary API for Asset management"
-        },
-        {
-            name: "Unsupported",
-            description: "Internal APIs that are unstable and should not be used in a production setting."
         }
    ];
 };
-
-service Events {
-    rpc Create(CreateEventRequest) returns (EventResponse) {
-        option (google.api.http) = {
-            post: "/archivist/v2/assets/{uuid}/events"
-            body: "*"
-        };
-    }
-}
 
 service Assets {
     rpc ListAssets(ListAssetsRequest) returns (ListAssetsResponse) {
@@ -59,7 +45,7 @@ service Assets {
             get: "/archivist/v2/assets"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            tags: [ "Assets & Events" ]
+            tags: [ "Assets and Events" ]
             summary: "List Assets"
             description: "Retrieves a list of Assets"
             responses: {
@@ -84,6 +70,12 @@ service Assets {
                 }
             }
             responses: {
+                key: "402";
+                value: {
+                    description: "Returned when the user's quota of Assets for the given proof mechanism has been reached."
+                }
+            }
+            responses: {
                 key: "403";
                 value: {
                     description: "Returned when the user is not authorized to list Assets.";
@@ -104,7 +96,7 @@ service Assets {
             body: "*"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            tags: [ "Assets & Events" ]
+            tags: [ "Assets and Events" ]
             summary: "Create an Asset"
             description: "Creates an Asset"
             responses: {
@@ -139,7 +131,7 @@ service Assets {
             get: "/archivist/v2/assets/{uuid}"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            tags: [ "Assets & Events" ]
+            tags: [ "Assets and Events" ]
             summary: "Retrieves a specific Asset"
             description: "Retrieves a specific Asset"
             responses: {
@@ -174,7 +166,7 @@ service Assets {
             get: "/archivist/v2/assets/{uuid}:publicurl"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            tags: [ "Assets & Events" ]
+            tags: [ "Assets and Events" ]
             summary: "Retrieves the public url for a specific Asset."
             description: "Retrieves the public url for a specific Asset."
             responses: {
@@ -209,7 +201,7 @@ service Assets {
             get: "/archivist/v2/assets/{asset_uuid}/events/{uuid}"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            tags: [ "Assets & Events" ]
+            tags: [ "Assets and Events" ]
             summary: "Retrieves Event"
             description: "Retrieves a specific Event"
             responses: {
@@ -244,7 +236,7 @@ service Assets {
             get: "/archivist/v2/assets/{asset_uuid}/events/{uuid}:publicurl"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            tags: [ "Assets & Events" ]
+            tags: [ "Assets and Events" ]
             summary: "Retrieves the public url for a specific Event."
             description: "Retrieves the public url for a specific Event."
             responses: {
@@ -279,7 +271,7 @@ service Assets {
             get: "/archivist/v2/assets/{uuid}/events"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            tags: [ "Assets & Events" ]
+            tags: [ "Assets and Events" ]
             summary: "List Events"
             description: "Lists Events"
             responses: {
@@ -324,7 +316,7 @@ service Assets {
             get: "/archivist/v2/assets:caps"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            tags: [ "Assets & Events", "Unsupported" ]  // Unsupported is signal for future OAPI parsing
+            tags: [ "Assets and Events", "Unsupported" ]  // Unsupported is signal for future OAPI parsing
             summary: "Get remaining capped resources for Assets"
             description: "Not stable or officially supported. Get remaining capped resources for Assets"
             responses: {
@@ -342,3 +334,36 @@ service Assets {
         };
     }
 }
+
+service Events {
+    rpc Create(CreateEventRequest) returns (EventResponse) {
+        option (google.api.http) = {
+            post: "/archivist/v2/assets/{uuid}/events"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            tags: [ "Assets and Events" ]
+            summary: "Creates an Event"
+            description: "Creates an Event"
+            responses: {
+                key: "401";
+                value: {
+                    description: "Returned when the user is not authenticated to the system."
+                }
+            }
+            responses: {
+                key: "402";
+                value: {
+                    description: "Returned when the user's quota of Events has been reached."
+                }
+            }
+            responses: {
+                key: "429";
+                value: {
+                    description: "Returned when a user exceeds their subscription's rate limit for requests.";
+                }
+            }
+        };
+    }
+}
+

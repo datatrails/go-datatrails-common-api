@@ -21,60 +21,25 @@ includes:
     # dev-notes/build-warts.md#always-set-dir-relative-to-current-task-file
     dir: ./taskfiles
 
-vars:
-  ACR: rkvstdev.azurecr.io
-  # Default to the stage master-latest builder image
-  # Note: the CI tags builder images with the build number of the avid-builder pipeline run,
-  # i.e. 20220607.10
-  # For local builder development build run `task builder` in the avid-builder git repo to
-  # build a new local builder image, then run these tasks like
-  #  task generate BUILDER_ACR=rkvstdev.azurecr.io BUILDER_IMAGE_TAG=dev-$USER
-  BUILDER_ACR: rkvststage.azurecr.io
-  BUILDER_IMAGE_TAG: master-latest
-
-  BUILD_CONTAINER: go-datatrails-common-api-builder
-
 tasks:
 
-  ### -------------------------
-  # Docker container tasks
-  ### -------------------------
-
-  builder-start:
-    summary: |
-      Creates the build container for go-datatrails-common-api
-
-      Many tasks docker exec into this container so DO NOT ADD --rm.
-
-      Use defer to cleanup the docker container in top level workflow tasks
-      which create the builder container
-    vars:
-      BUILDER_IMAGE: '{{.BUILDER_ACR}}/avid-builder:{{.BUILDER_IMAGE_TAG}}'
+  default:
+    desc: Default task lists all available tasks to run.
     cmds:
+      - which task
       - |
-        docker run \
-          --env CONCURRENCY={{.SKAFFOLD_CONCURRENCY | default 2}} \
-          --name {{.BUILD_CONTAINER}} \
-          -dt -u $(id -u):$(id -g) \
-          --mount type=bind,src=$(pwd),dst=/avid -w /avid \
-          {{.BUILDER_IMAGE}}
+        task --list --sort=none
 
-  builder-cleanup:
-    summary: cleans up the forestrie build container
+  environment:
+    desc: Show environment and location of tools executables.
     cmds:
-      - docker rm -f {{.BUILD_CONTAINER}}
+      - env | sort
+      - which go
 
   ### -------------------------
   # Primary workflow tasks 
   ### -------------------------
   all:
-    desc: "do everything necessary after clone (or rebase) in the builder"
-    cmds:
-      - task: builder-start
-      - defer: {task: builder-cleanup}
-      - docker exec -t {{.BUILD_CONTAINER}} task local-all
-
-  local-all:
     desc: |
       do everything necessary after clone (or rebase) (faster as it RUNS ON NATIVE HOST)
 
