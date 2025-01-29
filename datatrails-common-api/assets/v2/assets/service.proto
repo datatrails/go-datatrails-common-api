@@ -70,12 +70,6 @@ service Assets {
                 }
             }
             responses: {
-                key: "402";
-                value: {
-                    description: "Returned when the user's quota of Assets for the given proof mechanism has been reached."
-                }
-            }
-            responses: {
                 key: "403";
                 value: {
                     description: "Returned when the user is not authorized to list Assets.";
