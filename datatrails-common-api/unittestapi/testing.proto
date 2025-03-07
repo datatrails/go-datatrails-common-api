@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package unittestapi;
+option go_package="github.com/datatrails/go-datatrails-common-api-gen/unittestapi;unittestapi";
+
+message Int32Test {
+  int32 integer_value = 1;
+}

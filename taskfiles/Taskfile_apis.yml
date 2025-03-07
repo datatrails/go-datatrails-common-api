@@ -219,6 +219,7 @@ tasks:
       - task: attributev2-api
       - task: capsv1-api
       - task: filterv1-api
+      - task: unittestapi-api
     cmds:
       # dummy command, so api gen runs in parallel (deps do this automatically)
       - true
@@ -245,6 +246,13 @@ tasks:
     cmds:
       - task: any-api
         vars: {API: "filter/v1/filter" }
+
+  # Don't export this - its just for unit testing.
+  unittestapi-api:
+    summary: Generate the test api
+    cmds:
+      - task: any-api
+        vars: {API: "unittestapi" }
 
   any-api:
     # dev-notes/build-warts.md#always-set-dir-relative-to-current-task-file
