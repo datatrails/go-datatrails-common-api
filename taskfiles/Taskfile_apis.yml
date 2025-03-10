@@ -184,6 +184,7 @@ tasks:
         attribute/v2/attribute
         caps/v1/caps
         filter/v1/filter
+        unittestapi
       # The defaults match the expectations of .github/workflows/ci.yml
       COMMON_GODIR: go-datatrails-common-api-gen
       COMMON_PROTODIR: datatrails-common-api
