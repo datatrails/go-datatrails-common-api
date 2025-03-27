@@ -92,10 +92,10 @@ tasks:
         ls -la proto-include/grpc/health/v1/
 
   clean:generated:
-    desc: delete generated proto buf code
+    desc: delete generated proto buf code and helpers
     dir: '../datatrails-common-api'
     cmds:
-      - for ff in $(find . -name "*.pb*.go"); do rm -f $ff; done
+      - for ff in $(find . -name "*.go"); do rm -f $ff; done
       - for ff in $(find . -name "*.swagger.json"); do rm -f $ff; done
 
   preflight:
@@ -111,14 +111,21 @@ tasks:
       API_PROTO_DEPS: >-
         github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
         github.com/envoyproxy/protoc-gen-validate
+      GOBIN:
+        sh: echo ${GOBIN:-$HOME/go/bin}
     cmds:
       - |
-        go install \
-          github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
-          github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
-          google.golang.org/protobuf/cmd/protoc-gen-go \
-          google.golang.org/grpc/cmd/protoc-gen-go-grpc \
-          github.com/envoyproxy/protoc-gen-validate
+        set -euxo pipefail
+        go install tool
+
+        # protoc-gen-doc has rotted and still uses incompatible versions of google.golang.org/genproto
+        # which was split into submodules. This results in ambiguous import errors.
+        # See #10624
+        go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@v1.5.1
+
+        # show installed tools
+        go tool
+
       - for: { var: API_PROTO_DEPS }
         cmd: |
           depdir=$(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api \
@@ -140,18 +147,18 @@ tasks:
       # and do any general pruning or tidy up.
       - |
         # consumers of protoc-gen-validate expect a -I which allows them to do
-        # import "validate/validate.proto". And we don't need the java bindings or the example bindings
         rm -rf ../proto-include/validate
         mv -v ../proto-include/protoc-gen-validate/validate ../proto-include/
         rm -rf ../proto-include/protoc-gen-validate
-
 
   postflight:
     summary: run after all api generation tasks
     dir: '../datatrails-common-api'
     cmds:
-      - go mod tidy
-      - go mod verify
+      - |
+        set -euxo pipefail
+        go mod tidy
+        go mod verify
 
   generate:
     desc: generate api grpc bindings
@@ -159,6 +166,7 @@ tasks:
     cmds:
       - task: preflight
       - task: all-apis
+      - task: copy-helpers
       - task: postflight
 
   test:
@@ -169,13 +177,19 @@ tasks:
         go build ./...
         go test ./...
 
+  copy-helpers:
+    desc: copy helpers over datatrails-common-apisR
+    dir: '../datatrails-common-api'
+    cmds:
+      - |
+        cp -r ../helpers/* .
+
   export:
     desc: export the sources to the desired DESTDIR
     dir: '../datatrails-common-api'
     vars:
       SOURCES: >-
         marshalers
-        tools
         go.mod
         go.sum
       APIS: >-
@@ -183,7 +197,6 @@ tasks:
         attribute/v2/attribute
         caps/v1/caps
         filter/v1/filter
-        unittestapi
       # The defaults match the expectations of .github/workflows/ci.yml
       COMMON_GODIR: go-datatrails-common-api-gen
       COMMON_PROTODIR: datatrails-common-api
@@ -214,15 +227,12 @@ tasks:
   all-apis:
     summary: generate code for all interfaces and copy related sources
     dir: '../datatrails-common-api'
-    deps:
+    cmds:
       - task: assetsv2-api
       - task: attributev2-api
       - task: capsv1-api
       - task: filterv1-api
       - task: unittestapi-api
-    cmds:
-      # dummy command, so api gen runs in parallel (deps do this automatically)
-      - true
 
   assetsv2-api:
     summary: Generate the assetsv2 api
@@ -265,6 +275,7 @@ tasks:
       # Generates the swagger definitions for the gRPC service.
       # Generates the html docs for the gRPC service.
       - |
+        set -euxo pipefail
         protoc -I . -I proto-include \
          --go_out=paths=source_relative:{{.OUTPATH}} \
          --go-grpc_out=paths=source_relative:{{.OUTPATH}} \
@@ -274,7 +285,6 @@ tasks:
          --openapiv2_opt json_names_for_fields=false \
          --openapiv2_opt logtostderr=true \
          --grpc-gateway_out=paths=source_relative,logtostderr=true:{{.OUTPATH}} \
-         --plugin {{.GOBIN}}/protoc-gen-doc \
          --doc_out={{.SRCPATH}}{{.API}}/ \
          --doc_opt={{.SRCPATH}}confluence_doc.tmpl,{{.SRCPATH}}confluence.storage \
          {{.SRCPATH}}{{.API}}/*.proto
@@ -282,5 +292,3 @@ tasks:
       SRCPATH: datatrails-common-api/
       # OUTPATH: datatrails-common-api
       OUTPATH: . 
-      GOBIN:
-        sh: echo ${GOBIN:-$HOME/go/bin}
