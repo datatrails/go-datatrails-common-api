@@ -1,1 +1,5 @@
+marshalers/
 go.work
+*.go
+*.json
+*.storage
