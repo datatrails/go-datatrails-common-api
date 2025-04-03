@@ -2,19 +2,48 @@
 
 Common public api definitions for the DataTrails platform
 
-## Finding and including proto files for depdendecnies
+## Finding and including proto files for dependencies
 
-tools/go.mod is the source of truth for all proto providing dependencies. That file alone specifies both the upstream version we are using *and* is used, via go install, to make the .proto files available locally
+go.mod is the source of truth for all proto providing dependencies. That file alone specifies both the upstream version we are using *and* is used, via go get -tool, to make the .proto files available locally
 
-This corresponds to the practice recommended by grpc-gateway and elsewhere
+This corresponds to the practice recommended by grpc-gateway and elsewhere.
 
-1. *** ALWAYS *** Use tools/go.mod to specify the dependency version.
-2. Add the package to the `go install` command in the apis:preflight task
-3. If necessary, add a var for the new path in any-api **and** then add a reference to that var in the PROTO_INC var.
+1. Execute the `go get -tool` command to add the package to the go.mod file. This is a once-off command that simply
+   sets up go.mod to manages all tools.
+2. If necessary, add a var for the new path in any-api **and** then add a reference to that var in the PROTO_INC var.
+3. Executing 'go install tool' is then sufficient to install required tools and the only command required in workflows.
 
-Following this practice removes the need for dual maintenance of dependency versions in the builder image. It also produces a build cycle that is significantly faster.
+## Using the go tool commands
 
-Cross repository builds in docker while using go.work to refer to locally modified sources don't work. And this setup is essential for an efficient workflow.
+These commands are NOT executed as part of the dev workflow. 
+
+Add tools to the go.mod file:
+
+```
+    go get -tool github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.23.0
+    go get -tool github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.23.0
+    go get -tool google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.5
+    go get -tool google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+    go get -tool github.com/envoyproxy/protoc-gen-validate@v1.2.1
+```
+
+Inspect the go.mod file and show the 'tool' section:
+
+```
+tool (
+	github.com/envoyproxy/protoc-gen-validate
+	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
+	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	google.golang.org/protobuf/cmd/protoc-gen-go
+)
+```
+
+Show installed tools
+
+```
+    go tool
+```
 
 ## bootstrap proto files
 
@@ -24,28 +53,12 @@ For this reason we curl the proto's and make them available in our aggregate pro
 
 ## Workflow for updating common apis
 
-### Ensure the go tool chain is setup on your host
+### Ensure tools are setup on your host
 
-It is inordinately cumbersome to set this all up for docker. It can't be
-achieved without imposing significant inneficiencies in the workflow. For any
-engineer working on the api's it is reasonable to expect they can install the
-correct version of go for their host, and likely already have.
+This repo uses the go-task tool and also the go toolchain. The dev workflow is described below.
 
-### Use an avid/src/go.work
-
-First point avid at a clone of this repo so that it's imports will resolve
-directly against the sources in `./api`
-
-### Familiarize with the workflow sub tasks
-
-The general use entry points all use Docker and do not support efficiently and
-iteratively developing avid and other dependents against a local clone of this
-repo.
 
 #### For this repo
-
-You can do everything in the builder image using `task all`. This uses the
-blessed builder image and requires no host setup other than docker.
 
 If you are iterating it is a lot more efficient to use the sub tasks, because they all run on your host.
 
@@ -68,10 +81,6 @@ If you want to iterate on *just* the helper go code and there tests, do one roun
 
 Then just iterate using `task apis:generate` and `task apis:test`
 
-#### For avid
-
-See the README.md in avid/src/api/README.md
-
 ##### Build one api against locally cloned go-datatrails-common-api
 
 The protos can be included exactly as they are found from a clone of go-datatrails-common-api. *Without* needing to generate, build or export. Eg,
@@ -79,4 +88,4 @@ The protos can be included exactly as they are found from a clone of go-datatrai
     task apis:assetsv2-api \
         DATATRAILS_COMMON_API="../../go-datatrails-common-api"
 
-It is necessary however to run `task apis:bootsrap` after cloning go-datatrails-common
+It is necessary however to run `task apis:bootstrap` after cloning go-datatrails-common-api.
