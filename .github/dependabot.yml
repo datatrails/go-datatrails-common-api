@@ -1,0 +1,11 @@
+# refer: https://github.com/dependabot/dependabot-core/blob/main/.github/dependabot.yml
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "03:00"
+      timezone: "Europe/London"
