@@ -4,6 +4,7 @@ module github.com/datatrails/go-datatrails-common-api-gen
 // hence the module name
 
 go 1.22
+toolchain go1.24.1
 
 // This allows this module to operate as tho it were the generated module. This
 // allows us to manage the proto tool dependencies via this go.mod. This go.mod
@@ -20,8 +21,6 @@ require (
 	github.com/spf13/afero v1.10.0
 	github.com/stretchr/testify v1.9.0
 	go.mongodb.org/mongo-driver v1.12.1
-	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094
-	google.golang.org/grpc v1.65.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.3.0
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1
@@ -46,11 +45,13 @@ require (
 	github.com/rogpeppe/go-internal v1.6.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/crypto v0.25.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
+	google.golang.org/grpc v1.65.0 // indirect
 )
