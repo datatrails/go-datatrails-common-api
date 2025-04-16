@@ -118,8 +118,7 @@ tasks:
           github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
           google.golang.org/protobuf/cmd/protoc-gen-go \
           google.golang.org/grpc/cmd/protoc-gen-go-grpc \
-          github.com/envoyproxy/protoc-gen-validate \
-          github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc
+          github.com/envoyproxy/protoc-gen-validate
       - for: { var: API_PROTO_DEPS }
         cmd: |
           depdir=$(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api \
