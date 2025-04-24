@@ -64,6 +64,22 @@ tasks:
       - task: bootstrap:googleapis
       - task: bootstrap:grpc_health
 
+  bootstrap:toolsupgrade:
+    # only required to be run once when the version changes
+    # this is only here for documentation purposes - if you want to upgrade
+    # execute the go get -tool command manually
+    dir: '../datatrails-common-api'
+    cmds:
+      - |
+        set -euo pipefail
+
+        go get -tool github.com/envoyproxy/protoc-gen-validate@v1.2.1
+        go get -tool github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.23.0
+        go get -tool github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.23.0
+        go get -tool google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+        go get -tool google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.6
+
+
   bootstrap:googleapis:
     desc: download and prepare the google api proto definitions under proto-include
     dir: '..'
@@ -113,12 +129,7 @@ tasks:
         github.com/envoyproxy/protoc-gen-validate
     cmds:
       - |
-        go install \
-          github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
-          github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
-          google.golang.org/protobuf/cmd/protoc-gen-go \
-          google.golang.org/grpc/cmd/protoc-gen-go-grpc \
-          github.com/envoyproxy/protoc-gen-validate
+        go install tool
       - for: { var: API_PROTO_DEPS }
         cmd: |
           depdir=$(GOCACHE=/tmp/datatrails/go-datatrails-common-api/api \
@@ -132,9 +143,6 @@ tasks:
             mkdir -p $(dirname $target)
             cp -v $proto $target
           done
-          # find ../proto-include/${basedir}
-          # find $d -type f -name "*.proto"
-          # echo $(dirname $d)
 
       # move things around so that consumers only need to -I proto-include,
       # and do any general pruning or tidy up.
@@ -175,7 +183,6 @@ tasks:
     vars:
       SOURCES: >-
         marshalers
-        tools
         go.mod
         go.sum
       APIS: >-
